@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Stocklot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+  <div class="bg-white p-8 rounded-2xl shadow-lg w-96">
+    <h1 class="text-2xl font-semibold text-center mb-6">Login to Stocklot</h1>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg">Login</button>
+    </form>
+    <p class="text-center text-sm mt-4">
+      Don’t have an account? <a href="{% url 'register' %}" class="text-blue-600 hover:underline">Register</a>
+    </p>
+  </div>
+
+</body>
+</html>

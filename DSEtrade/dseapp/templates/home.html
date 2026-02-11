@@ -1,0 +1,443 @@
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stocklot | Smart Investment Hub</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2331/2331947.png">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'gradient': 'gradient 15s ease infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        gradient: {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .gradient-bg {
+            background: linear-gradient(-45deg, #22c55e, #16a34a, #15803d, #14532d);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 font-sans antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full top-0 z-50 transition-all duration-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 lg:h-20">
+                <a href="/" class="flex items-center space-x-3 group">
+                    <div class="bg-white p-2 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2331/2331947.png" alt="Logo" class="w-7 h-7">
+                    </div>
+                    <span class="font-black text-2xl bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">Stocklot</span>
+                </a>
+
+                <div class="hidden lg:flex items-center space-x-10">
+                    <a href="#features" class="text-cyan-400 hover:text-primary-600 font-semibold transition-all duration-300 hover:scale-105">Features</a>
+                    <a href="portfolio" class="text-cyan-400 hover:text-primary-600 font-semibold transition-all duration-300 hover:scale-105">Portfolio</a>
+                    <a href="#contact" class="text-cyan-400 hover:text-primary-600 font-semibold transition-all duration-300 hover:scale-105">Contact</a>
+                </div>
+
+                <div class="hidden lg:flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <div class="flex items-center space-x-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl shadow-sm">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-sm font-semibold text-gray-700">Hi, {{ user.username }}</span>
+                        </div>
+                        <a href="{% url 'logout' %}" class="bg-white text-gray-700 px-6 py-2.5 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300 shadow-sm hover:shadow-md border border-gray-200">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary-600 font-semibold px-6 py-2.5 rounded-xl transition-all duration-300 hover:bg-white/80">Login</a>
+                        <a href="{% url 'register' %}" class="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:shadow-xl transition-all duration-300 shadow-lg hover:scale-105">Get Started</a>
+                    {% endif %}
+                </div>
+
+                <button id="menuBtn" class="lg:hidden bg-white p-2 rounded-xl shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-28 pb-20 lg:pt-36 lg:pb-28 overflow-hidden gradient-bg">
+        <div class="absolute inset-0 bg-black/10"></div>
+        <div class="absolute top-10 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-primary-300/20 rounded-full blur-3xl"></div>
+        
+        <div class="relative max-w-7xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
+            <div class="text-center lg:text-left text-white">
+                <div class="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
+                    <span class="text-sm font-semibold">🚀 The Future of Investing is Here</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight">
+                    Smart Investing <br> 
+                    <span class="bg-gradient-to-r from-white to-primary-100 bg-clip-text text-transparent">Made Simple</span>
+                </h1>
+                <p class="mt-6 text-lg text-blue-100 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                    Harness AI-powered insights, real-time analytics, and professional tools to grow your wealth with confidence.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <a href="{% url 'register' %}" class="group bg-white text-primary-600 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
+                        <span>Start Investing Free</span>
+                        <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="#features" class="group glass text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition-all duration-300 flex items-center justify-center space-x-2">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Watch Demo</span>
+                    </a>
+                </div>
+                
+                <div class="mt-12 flex items-center justify-center lg:justify-start space-x-8 text-blue-100">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold">50K+</div>
+                        <div class="text-sm">Active Investors</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold">$2.1B+</div>
+                        <div class="text-sm">Assets Managed</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold">4.9★</div>
+                        <div class="text-sm">User Rating</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="relative mt-12 lg:mt-0">
+                <div class="relative animate-float">
+                    <div class="glass rounded-3xl p-6 shadow-2xl backdrop-blur-sm">
+                        <div class="bg-white/20 rounded-2xl p-1">
+                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Dashboard Preview" class="rounded-2xl shadow-2xl">
+                        </div>
+                    </div>
+                    
+                    <!-- Floating elements -->
+                    <div class="absolute -top-4 -left-4 bg-white rounded-2xl p-4 shadow-2xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-green-500 p-2 rounded-xl">
+                                <i class="fas fa-chart-line text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500">Portfolio</div>
+                                <div class="font-bold text-green-600">+12.4%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute -bottom-4 -right-4 bg-white rounded-2xl p-4 shadow-2xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-primary-500 p-2 rounded-xl">
+                                <i class="fas fa-bell text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500">Alerts</div>
+                                <div class="font-bold text-primary-600">3 New</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <div class="inline-flex items-center space-x-2 bg-primary-50 text-primary-600 px-4 py-2 rounded-full mb-4">
+                    <span class="text-sm font-semibold">✨ WHY CHOOSE US</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6">
+                    Everything You Need to <br>
+                    <span class="bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">Succeed</span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    We combine cutting-edge technology with financial expertise to give you the edge in today's markets.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="group bg-gradient-to-br from-white to-gray-50 p-8 rounded-3xl border border-gray-200 hover:border-primary-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-4">
+                    <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-chart-network text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">AI Portfolio Management</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">Our advanced algorithms continuously optimize your portfolio based on market conditions and your risk profile.</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>Automated rebalancing</span>
+                        </li>
+                        <li class="flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>Risk assessment tools</span>
+                        </li>
+                        <li class="flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>Performance analytics</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="group bg-gradient-to-br from-white to-gray-50 p-8 rounded-3xl border border-gray-200 hover:border-primary-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-4">
+                    <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Smart Market Insights</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">Get real-time analysis, trend predictions, and actionable insights powered by machine learning and big data.</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>Real-time analytics</span>
+                        </li>
+                        <li class="flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>Pattern recognition</span>
+                        </li>
+                        <li class="flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>Sentiment analysis</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="group bg-gradient-to-br from-white to-gray-50 p-8 rounded-3xl border border-gray-200 hover:border-primary-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-4">
+                    <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-shield-alt text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Secure & Compliant</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">Bank-level security with full regulatory compliance ensures your investments and data are always protected.</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>256-bit encryption</span>
+                        </li>
+                        <li class="flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>Two-factor authentication</span>
+                        </li>
+                        <li class="flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>Regular security audits</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-primary-900 to-primary-800 relative overflow-hidden">
+        <div class="absolute inset-0 bg-black/20"></div>
+        <div class="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-black/10 to-transparent"></div>
+        
+        <div class="relative max-w-4xl mx-auto text-center px-6">
+            <h2 class="text-4xl md:text-5xl font-black text-white mb-6">
+                Ready to Transform Your <br>
+                <span class="bg-gradient-to-r from-primary-200 to-white bg-clip-text text-transparent">Investment Journey?</span>
+            </h2>
+            <p class="text-xl text-primary-100 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Join thousands of smart investors who are already building wealth with Stocklot.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'register' %}" class="group bg-white text-primary-600 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 shadow-lg flex items-center justify-center space-x-3">
+                    <span>Start Free Trial</span>
+                    <i class="fas fa-rocket group-hover:scale-110 transition-transform"></i>
+                </a>
+                <a href="#contact" class="group border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-primary-600 transition-all duration-300 flex items-center justify-center space-x-3">
+                    <i class="fas fa-calendar"></i>
+                    <span>Book Demo</span>
+                </a>
+            </div>
+            <p class="text-primary-200 mt-6 text-sm">No credit card required • 14-day free trial</p>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <div class="inline-flex items-center space-x-2 bg-primary-50 text-primary-600 px-4 py-2 rounded-full mb-4">
+                <span class="text-sm font-semibold">📞 GET IN TOUCH</span>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6">
+                Let's Build Your <br>
+                <span class="bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">Financial Future</span>
+            </h2>
+            <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+                Our team of experts is here to help you succeed. Reach out for personalized guidance.
+            </p>
+            <div class="grid md:grid-cols-3 gap-8 mt-12">
+                <div class="text-center p-8 rounded-3xl bg-gradient-to-b from-gray-50 to-white border border-gray-200 hover:shadow-xl transition-all duration-300">
+                    <div class="bg-primary-100 text-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-envelope text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Email Us</h3>
+                    <p class="text-primary-600 font-semibold">support@stocklot.com</p>
+                </div>
+                <div class="text-center p-8 rounded-3xl bg-gradient-to-b from-gray-50 to-white border border-gray-200 hover:shadow-xl transition-all duration-300">
+                    <div class="bg-primary-100 text-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-phone text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Call Us</h3>
+                    <p class="text-primary-600 font-semibold">+1 (555) 123-4567</p>
+                </div>
+                <div class="text-center p-8 rounded-3xl bg-gradient-to-b from-gray-50 to-white border border-gray-200 hover:shadow-xl transition-all duration-300">
+                    <div class="bg-primary-100 text-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-comments text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Live Chat</h3>
+                    <p class="text-primary-600 font-semibold">24/7 Support</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-primary-600"></div>
+        
+        <div class="relative max-w-7xl mx-auto py-16 px-6 lg:px-8">
+            <div class="grid lg:grid-cols-4 gap-12">
+                <!-- Brand -->
+                <div class="lg:col-span-1">
+                    <a href="/" class="flex items-center space-x-3 mb-6">
+                        <div class="bg-white p-2 rounded-xl">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2331/2331947.png" alt="Logo" class="w-7 h-7">
+                        </div>
+                        <span class="font-black text-2xl text-white">Stocklot</span>
+                    </a>
+                    <p class="text-gray-400 mb-6 leading-relaxed">
+                        Empowering investors with AI-driven insights and professional tools for smarter wealth creation.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="bg-gray-800 p-3 rounded-xl hover:bg-primary-600 transition-all duration-300">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="bg-gray-800 p-3 rounded-xl hover:bg-primary-600 transition-all duration-300">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="bg-gray-800 p-3 rounded-xl hover:bg-primary-600 transition-all duration-300">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-8 lg:col-span-3">
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-6">Platform</h3>
+                        <ul class="space-y-4">
+                            <li><a href="#features" class="text-gray-400 hover:text-white transition-colors duration-300">Features</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Pricing</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Security</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">API</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-6">Company</h3>
+                        <ul class="space-y-4">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">About Us</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Careers</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Blog</a></li>
+                            <li><a href="#contact" class="text-gray-400 hover:text-white transition-colors duration-300">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-6">Resources</h3>
+                        <ul class="space-y-4">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Help Center</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Community</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Privacy Policy</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Terms of Service</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16 pt-8 border-t border-gray-800 text-center text-gray-400">
+                <p>&copy; {% if now %}{{ now|date:"Y" }}{% else %}2025{% endif %} Stocklot. All rights reserved. Built with ❤️ for smart investors.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const menuBtn = document.getElementById("menuBtn");
+        const mobileMenu = document.getElementById("mobileMenu");
+        
+        menuBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("hidden");
+        });
+
+        // Close menu when a link is clicked
+        const mobileLinks = document.querySelectorAll('#mobileMenu a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 100) {
+                nav.classList.add('bg-white/95', 'shadow-lg', 'backdrop-blur-md');
+                nav.classList.remove('bg-transparent');
+            } else {
+                nav.classList.remove('bg-white/95', 'shadow-lg');
+                nav.classList.add('bg-transparent');
+            }
+        });
+    </script>
+</body>
+</html>

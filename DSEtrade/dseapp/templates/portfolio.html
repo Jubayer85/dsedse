@@ -1,0 +1,500 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portfolio Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              300: '#c3e6f0ff',
+              500: '#7cc2f1ff',
+              600: '#289bc9ff',
+              700: '#0369a1',
+              900: '#0c4a6e',
+            }
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(10px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 min-h-screen">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-10 glass shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="bg-gradient-to-r from-primary-500 to-primary-600 p-2 rounded-xl shadow-md">
+          <i class="fas fa-chart-line text-white text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-300 ">Portfolio Dashboard</h1>
+          <p class="text-sm text-gray-500">Track & manage your investments</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="text-right hidden sm:block">
+          <div class="text-xs text-gray-500">Last updated</div>
+          <div class="text-sm font-medium">
+            {{ portfolio.created_at|date:"M d, Y H:i" }}
+          </div>
+        </div>
+        <div class="h-8 w-8 bg-primary-100 rounded-full flex items-center justify-center">
+          <i class="fas fa-user text-primary-600 text-sm"></i>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- Summary Cards -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white p-6 rounded-2xl shadow-sm card-hover border-l-4 border-primary-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm text-gray-500 font-medium">Balance</div>
+            <div class="mt-2 text-2xl font-bold text-gray-900">৳ {{ portfolio.balance|floatformat:2 }}</div>
+          </div>
+          <div class="bg-primary-50 p-3 rounded-xl">
+            <i class="fas fa-wallet text-primary-600 text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm card-hover border-l-4 border-green-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm text-gray-500 font-medium">Total Equity</div>
+            <div class="mt-2 text-2xl font-bold text-gray-900">৳ {{ portfolio.total_equity|floatformat:2 }}</div>
+          </div>
+          <div class="bg-green-50 p-3 rounded-xl">
+            <i class="fas fa-chart-pie text-green-600 text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm card-hover border-l-4 border-blue-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm text-gray-500 font-medium">Realized P&L</div>
+            <div class="mt-1 text-lg font-semibold text-green-600">+৳ {{ portfolio.realized_gain|floatformat:2 }}</div>
+            <div class="text-sm font-medium text-red-600">-৳ {{ portfolio.realized_loss|floatformat:2 }}</div>
+          </div>
+          <div class="bg-blue-50 p-3 rounded-xl">
+            <i class="fas fa-exchange-alt text-blue-600 text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm card-hover border-l-4 border-purple-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm text-gray-500 font-medium">Cash Flow</div>
+            <div class="mt-1 text-lg font-semibold text-gray-900">+৳ {{ portfolio.total_deposit|floatformat:2 }}</div>
+            <div class="text-sm font-medium text-gray-600">-৳ {{ portfolio.total_withdrawal|floatformat:2 }}</div>
+          </div>
+          <div class="bg-purple-50 p-3 rounded-xl">
+            <i class="fas fa-money-bill-wave text-purple-600 text-xl"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <div class="grid grid-cols-3 gap-4 mt-6">
+  <div class="bg-green-100 text-green-800 p-4 rounded-xl shadow text-center">
+    <h3 class="font-semibold text-lg">💰 Total Deposit</h3>
+    <p class="text-2xl font-bold">৳ {{ total_deposit|floatformat:2 }}</p>
+  </div>
+
+  <div class="bg-red-100 text-red-800 p-4 rounded-xl shadow text-center">
+    <h3 class="font-semibold text-lg">💸 Total Withdraw</h3>
+    <p class="text-2xl font-bold">৳ {{ total_withdraw|floatformat:2 }}</p>
+  </div>
+
+  <div class="bg-blue-100 text-blue-800 p-4 rounded-xl shadow text-center">
+    <h3 class="font-semibold text-lg">🏦 Current Balance</h3>
+    <p class="text-2xl font-bold">৳ {{ portfolio.balance|floatformat:2 }}</p>
+  </div>
+</div>
+
+
+    <!-- Deposit & Withdrawal Forms -->
+<div class="bg-white p-6 rounded-2xl shadow-sm mb-8 animate-fade-in">
+  <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+    <i class="fas fa-money-bill-transfer text-primary-600"></i>
+    Cash Management
+  </h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Deposit Form -->
+    <form method="POST" action="{% url 'deposit' %}" class="bg-green-50 p-4 rounded-xl border border-green-200">
+      {% csrf_token %}
+      <h3 class="text-lg font-semibold text-green-800 mb-3 flex items-center gap-2">
+        <i class="fas fa-arrow-down"></i>
+        Deposit Funds
+      </h3>
+      <div class="space-y-3">
+        <input type="number" name="amount" step="0.01" min="0.01" placeholder="Enter amount"
+               class="w-full border border-green-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" required>
+        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2">
+          <i class="fas fa-plus"></i>
+          Deposit
+        </button>
+      </div>
+    </form>
+
+    <!-- Withdrawal Form -->
+    <form method="POST" action="{% url 'withdraw' %}" class="bg-red-50 p-4 rounded-xl border border-red-200">
+      {% csrf_token %}
+      <h3 class="text-lg font-semibold text-red-800 mb-3 flex items-center gap-2">
+        <i class="fas fa-arrow-up"></i>
+        Withdraw Funds
+      </h3>
+      <div class="space-y-3">
+        <input type="number" name="amount" step="0.01" min="0.01" placeholder="Enter amount"
+               class="w-full border border-red-300 rounded-lg p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all" required>
+        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2">
+          <i class="fas fa-minus"></i>
+          Withdraw
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+    <!-- Update Market Price Form -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm mb-8 animate-fade-in">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <i class="fas fa-sync-alt text-primary-600"></i>
+        Update Market Price
+      </h2>
+      <form method="POST" action="{% url 'update_market_price' %}" class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        {% csrf_token %}
+        <div class="flex-1 w-full">
+          <select name="instrument" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all" required>
+            <option value="" disabled selected>Select Instrument</option>
+            {% for instrument in instruments %}
+              <option value="{{ instrument }}">{{ instrument }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="flex-1 w-full">
+          <input type="number" name="market_price" step="0.01" placeholder="Enter new price" min="0"
+                 class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all" required>
+        </div>
+        
+        <button type="submit" class="w-full sm:w-auto bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2">
+          <i class="fas fa-arrow-up"></i>
+          Update Price
+        </button>
+      </form>
+    </div>
+
+    <!-- Orders + Sidebar -->
+   
+
+
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Orders List -->
+      <div class="lg:col-span-2">
+        <div class="bg-white p-6 rounded-2xl shadow-sm animate-slide-up">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <i class="fas fa-list-ul text-primary-600"></i>
+              Orders
+            </h2>
+            <a href="{% url 'order_create' %}" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold hover:shadow-lg transition-all flex items-center gap-2">
+              <i class="fas fa-plus"></i>
+              New Order
+            </a>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Instrument</th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Qty</th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Cost / Unit</th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Cost</th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Market / Unit</th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Market Value</th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Unrealized P/L</th>
+                  <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody class="bg-white divide-y divide-gray-100">
+                {% for order in orders %}
+                <tr id="order-row-{{ order.id }}" class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="bg-primary-50 p-2 rounded-lg mr-3">
+                        <i class="fas fa-chart-bar text-primary-600 text-sm"></i>
+                      </div>
+                      <div>
+                        <div class="text-sm font-semibold text-gray-900">{{ order.instrument }}</div>
+                        <div class="text-xs text-gray-500">{{ order.created_at|date:"M d, Y" }}</div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="px-6 py-4 text-right text-sm font-medium text-gray-700">{{ order.quantity }}</td>
+                  
+                  <!-- Cost Price Column -->
+                  <td>৳ {{ order.cost_price|floatformat:2 }}</td>
+                  
+                  <!-- NEW: Total Cost Column -->
+                  <td class="px-6 py-4 text-right text-sm font-medium text-gray-700">
+                    ৳ {{ order.total_cost_with_charge|floatformat:2 }}
+                  </td>
+                  
+                  <!-- Market Price Column -->
+                  <td class="px-6 py-4 text-right text-sm font-medium text-gray-700">
+                    {% if order.market_price %}
+                      ৳ {{ order.market_price|floatformat:2 }}
+                    {% else %}
+                      <span class="text-gray-400">-</span>
+                    {% endif %}
+                  </td>
+
+
+                  <!-- NEW: Total Market Value Column -->
+                  <td class="px-6 py-4 text-right text-sm font-medium text-gray-700">
+                    {% if order.market_price %}
+                      ৳ {{ order.total_market_value|floatformat:2 }}
+                    {% else %}
+                      <span class="text-gray-400">-</span>
+                    {% endif %}
+                  </td>
+
+                  <!-- Unrealized P/L Column -->
+                  <td class="px-6 py-4 text-right text-sm font-semibold">
+                    {% with up=order.unrealized_profit ul=order.unrealized_loss %}
+                      {% if up > 0 %}
+                        <span class="text-green-600">+৳ {{ up|floatformat:2 }}</span>
+                      {% elif ul > 0 %}
+                        <span class="text-red-600">-৳ {{ ul|floatformat:2 }}</span>
+                      {% else %}
+                        <span class="text-gray-500">৳ 0.00</span>
+                      {% endif %}
+                    {% endwith %}
+                  </td>
+
+                  <td class="px-6 py-4 text-center">
+                    {% if order.is_closed %}
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                        <i class="fas fa-lock mr-1"></i> Closed
+                      </span>
+                    {% else %}
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                        <i class="fas fa-unlock mr-1"></i> Open
+                      </span>
+                    {% endif %}
+                  </td>
+
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <a href="#" class="text-primary-600 hover:text-primary-800 p-2 rounded-lg hover:bg-primary-50 transition-colors">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      {% if not order.is_closed %}
+                        {% if order.market_price %}
+                          <a href="{% url 'close_order' order.id %}" class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors" onclick="return confirm('Are you sure you want to close this order?')">
+                            <i class="fas fa-times"></i>
+                          </a>
+                        {% else %}
+                          <span class="text-gray-400 p-2 rounded-lg cursor-not-allowed" title="Set market price first">
+                            <i class="fas fa-times"></i>
+                          </span>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="9" class="px-6 py-8 text-center">  <!-- ✅ FIXED: colspan="9" -->
+                    <div class="flex flex-col items-center justify-center text-gray-400">
+                      <i class="fas fa-inbox text-4xl mb-2"></i>
+                      <p class="text-lg">No orders found</p>
+                      <p class="text-sm mt-1">Create your first order to get started</p>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar (same as before) -->
+      <aside class="space-y-6">
+        <!-- Quick Stats -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm animate-slide-up">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i class="fas fa-chart-bar text-primary-600"></i>
+            Quick Stats
+          </h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-gradient-to-br from-primary-50 to-primary-100 p-4 rounded-xl border border-primary-100">
+              <div class="text-xs text-primary-600 font-medium">Open Orders</div>
+              <div class="text-2xl font-bold text-primary-700 mt-1">
+                {{ orders|length }}
+              </div>
+            </div>
+            <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-100">
+              <div class="text-xs text-green-600 font-medium">Total Unrealized PnL</div>
+              <div class="text-2xl font-bold text-green-700 mt-1">৳ {{ portfolio.unrealized_pnl|floatformat:2 }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Open Orders -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm animate-slide-up">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i class="fas fa-clock text-primary-600"></i>
+            Open Orders
+          </h3>
+          <ul class="space-y-3">
+            {% for order in orders %}
+              {% if not order.is_closed %}
+              <li class="p-4 border border-gray-200 rounded-xl hover:border-primary-300 transition-colors">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div class="bg-primary-50 p-2 rounded-lg mr-3">
+                      <i class="fas fa-chart-line text-primary-600 text-sm"></i>
+                    </div>
+                    <div>
+                      <div class="text-sm font-semibold">{{ order.instrument }}</div>
+                      <div class="text-xs text-gray-500">Qty: {{ order.quantity }}</div>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-sm font-semibold">
+                      ৳ {{ order.market_price|default:order.cost_price|floatformat:2 }}
+                    </div>
+                    <div class="text-xs mt-1">
+                      {% with up=order.unrealized_profit ul=order.unrealized_loss %}
+                        {% if up > 0 %}
+                          <span class="text-green-600 font-medium">+৳ {{ up|floatformat:2 }}</span>
+                        {% elif ul > 0 %}
+                          <span class="text-red-600 font-medium">-৳ {{ ul|floatformat:2 }}</span>
+                        {% else %}
+                          <span class="text-gray-500">৳ 0.00</span>
+                        {% endif %}
+                      {% endwith %}
+                    </div>
+                  </div>
+                </div>
+              </li>
+              {% endif %}
+            {% empty %}
+              <li class="text-center py-4 text-gray-400">
+                <i class="fas fa-folder-open text-2xl mb-2"></i>
+                <p class="text-sm">No open orders</p>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </aside>
+    </section>
+
+    <!-- Messages -->
+    {% if messages %}
+      <div class="max-w-7xl mx-auto px-4 mt-6">
+        {% for message in messages %}
+          <div class="p-4 rounded-xl text-sm font-medium {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-200{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border border-yellow-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %} animate-fade-in flex items-center gap-2">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center text-sm text-gray-500 py-4 border-t border-gray-200">
+      <div class="flex items-center justify-center gap-1">
+        <i class="fas fa-copyright text-xs"></i>
+        {{ now|date:"Y" }} Stocklot. All rights reserved.
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    // Add some interactive functionality
+    
+
+      // Confirm before closing orders
+      const closeButtons = document.querySelectorAll('a[href*="close_order"]');
+      closeButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          if (!confirm('Are you sure you want to close this order? This action cannot be undone.')) {
+            e.preventDefault();
+          }
+        });
+      });
+
+      // Add loading state to forms
+      const forms = document.querySelectorAll('form');
+      forms.forEach(form => {
+        form.addEventListener('submit', function() {
+          const submitButton = this.querySelector('button[type="submit"]');
+          if (submitButton) {
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            submitButton.disabled = true;
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

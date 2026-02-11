@@ -1,0 +1,19 @@
+from django.urls import path 
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('portfolio/', views.portfolio, name='portfolio'),
+    path('order/create/', views.order_create, name='order_create'),
+    path('update_market_price/', views.update_market_price, name='update_market_price'),
+    path('close_order/<int:order_id>/', views.close_order, name='close_order'),
+    path('register/', views.register_view, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path("deposit/", views.deposit, name="deposit"),
+    path("withdraw/", views.withdraw, name="withdraw"),
+    path('execute_order/<int:order_id>/', views.execute_order, name='execute_order'),
+    path('update_closed_order_balance/', views.update_closed_order_balance, name='update_closed_order_balance'),
+
+
+]
