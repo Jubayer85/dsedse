@@ -1,20 +1,15 @@
 """
 Django settings for config project.
 """
-
-import pymysql
-pymysql.install_as_MySQLdb()
-
+from pathlib import Path
+import os
 # ✅ MariaDB version check bypass - MUST BE AT VERY TOP
-import django
-from django.db.backends.mysql.base import DatabaseWrapper
-from django.db.backends.mysql.features import DatabaseFeatures
+
 
 # Disable MariaDB version check
 def check_database_version_supported(self):
     pass
 
-DatabaseWrapper.check_database_version_supported = check_database_version_supported
 
 from pathlib import Path
 
@@ -64,19 +59,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database - MySQL Configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'stocklot_db',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'charset': 'utf8mb4',
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
