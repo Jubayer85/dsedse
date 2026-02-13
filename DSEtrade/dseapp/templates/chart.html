@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trading Dashboard</title>
+
+    <style>
+        .chart-box {
+            width: 100%;
+            height: 500px;
+            margin-bottom: 30px;
+        }
+
+        .signal-box {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .settings-panel {
+            margin: 20px auto;
+            width: 90%;
+            padding: 15px;
+            background: #111;
+            color: white;
+            border-radius: 10px;
+        }
+
+        .settings-panel select, 
+        .settings-panel input {
+            padding: 8px;
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2 style="text-align:center;">📊 Live Trading Dashboard</h2>
+
+<!-- ==================== SETTINGS PANEL ==================== -->
+<div class="settings-panel">
+    <h3>⚙ Dashboard Settings</h3>
+
+    <label>1) WebSocket + Indicator Calculation:</label>
+    <select id="opt_ws">
+        <option value="on">ON</option>
+        <option value="off">OFF</option>
+    </select>
+
+    <label>2) Auto Buy/Sell Signal:</label>
+    <select id="opt_signal">
+        <option value="on">ON</option>
+        <option value="off">OFF</option>
+    </select>
+
+    <label>3) Source:</label>
+    <select id="opt_backend">
+        <option value="frontend">Frontend Only</option>
+        <option value="django">Django WebSocket Backend</option>
+    </select>
+
+    <label>4) Real-time API Provider:</label>
+    <select id="opt_api">
+        <option value="binance">Binance WebSocket</option>
+        <option value="twelvedata">TwelveData REST API</option>
+    </select>
+</div>
+
+<!-- ==================== INDICATOR PANEL ==================== -->
+<div style="display:flex; justify-content:center; gap:20px; margin:20px;">
+
+    <div style="padding:15px; background:#111; color:#fff; border-radius:8px;">
+        <h4>BTCUSD Live Price</h4>
+        <div id="live_price" style="font-size:22px; font-weight:bold;"></div>
+    </div>
+
+    <div style="padding:15px; background:#111; color:#fff; border-radius:8px;">
+        <h4>EMA 20</h4>
+        <div id="ema20"></div>
+    </div>
+
+    <div style="padding:15px; background:#111; color:#fff; border-radius:8px;">
+        <h4>EMA 50</h4>
+        <div id="ema50"></div>
+    </div>
+
+    <div style="padding:15px; background:#111; color:#fff; border-radius:8px;">
+        <h4>RSI 14</h4>
+        <div id="rsi"></div>
+    </div>
+
+    <div style="padding:15px; background:#111; color:#fff; border-radius:8px;">
+        <h4>Volume</h4>
+        <div id="vol"></div>
+    </div>
+
+</div>
+
+<!-- ==================== AUTO SIGNAL BOX ==================== -->
+<div id="signal_output" class="signal-box" style="background:#333;">Loading Signals...</div>
+
+
+<!-- ==================== TRADINGVIEW CHARTS ==================== -->
+<h3>EUR/USD Live Chart</h3>
+<div id="eurusd_chart" class="chart-box"></div>
+
+<h3>Gold (XAUUSD) Live Chart</h3>
+<div id="gold_chart" class="chart-box"></div>
+
+<h3>Silver Chart</h3>
+<div id="silver_chart" class="chart-box"></div>
+
+<h3>BTC/USD Chart</h3>
+<div id="btcusd_chart" class="chart-box"></div>
+
+<script src="https://s3.tradingview.com/tv.js"></script>
+
+<script>
+function getSetting(id) {
+    return document.getElementById(id).value;
+}
+
+let ws = null;
+
+function startFeed() {
+    const api = getSetting("opt_api");
+    const backend = getSetting("opt_backend");
+
+    if (backend === "django") {
+        ws = new WebSocket("ws://127.0.0.1:8000/ws/price/");
+    } 
+    else if (api === "binance") {
+        ws = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@kline_1m");
+    } 
+    else if (api === "twelvedata") {
+        setInterval(fetchTwelveData, 5000);
+        return;
+    }
+
+    ws.onmessage = processWS;
+}
+
+function fetchTwelveData() {
+    fetch("https://api.twelvedata.com/time_series?symbol=BTC/USD&interval=1min&apikey=demo")
+        .then(res => res.json())
+        .then(data => {
+            let last = data.values[0];
+            processData(parseFloat(last.close), parseFloat(last.volume));
+        });
+}
+
+let closes = [];
+let volumes = [];
+
+function processWS(event) {
+    const data = JSON.parse(event.data);
+
+    let k = data.k;
+    if (!k.x) return;
+
+    processData(parseFloat(k.c), parseFloat(k.v));
+}
+
+function ema(values, period) {
+    const k = 2 / (period + 1);
+    return values.reduce((acc, val, i) =>
+        i === 0 ? val : val * k + acc * (1 - k)
+    );
+}
+
+function rsi(values, period = 14) {
+    if (values.length < period) return null;
+
+    let gains = 0, losses = 0;
+
+    for (let i = 1; i < period + 1; i++) {
+        let diff = values[i] - values[i - 1];
+        diff >= 0 ? gains += diff : losses -= diff;
+    }
+
+    return 100 - (100 / (1 + (gains / period) / (losses / period)));
+}
+
+function processData(close, volume) {
+    if (getSetting("opt_ws") === "off") return;
+
+    closes.push(close);
+    volumes.push(volume);
+
+    if (closes.length > 200) closes.shift();
+    if (volumes.length > 200) volumes.shift();
+
+    let ema20v = ema(closes.slice(-20), 20);
+    let ema50v = ema(closes.slice(-50), 50);
+    let rsi14v = rsi(closes, 14);
+
+    document.getElementById("live_price").innerHTML = close.toFixed(2);
+    document.getElementById("ema20").innerHTML = ema20v.toFixed(2);
+    document.getElementById("ema50").innerHTML = ema50v.toFixed(2);
+    document.getElementById("rsi").innerHTML = rsi14v ? rsi14v.toFixed(2) : "Loading...";
+    document.getElementById("vol").innerHTML = volume.toFixed(2);
+
+    if (getSetting("opt_signal") === "on") {
+        generateSignal(close, ema20v, ema50v, rsi14v, volume);
+    }
+}
+
+function generateSignal(price, ema20v, ema50v, rsi14v, volume) {
+    let box = document.getElementById("signal_output");
+
+    if (ema20v > ema50v && rsi14v < 45 && volume > 50) {
+        box.style.background = "green";
+        box.innerHTML = "🚀 BUY SIGNAL";
+        return;
+    }
+
+    if (ema20v < ema50v && rsi14v > 60 && volume > 50) {
+        box.style.background = "red";
+        box.innerHTML = "🔻 SELL SIGNAL";
+        return;
+    }
+
+    box.style.background = "#444";
+    box.innerHTML = "😴 No Signal";
+}
+
+function loadChart(container, symbol) {
+    new TradingView.widget({
+        "width": "100%",
+        "height": 500,
+        "symbol": symbol,
+        "interval": "15",
+        "timezone": "Asia/Dhaka",
+        "theme": "light",
+        "container_id": container
+    });
+}
+
+loadChart("eurusd_chart", "FX:EURUSD");
+loadChart("gold_chart", "OANDA:XAUUSD");
+loadChart("silver_chart", "OANDA:XAGUSD");
+loadChart("btcusd_chart", "COINBASE:BTCUSD");
+
+startFeed();
+</script>
+
+
+
+<!-- ============================================================
+     ADVANCED SMART CHART (BreakEven + Exit + Auto TP)
+============================================================ -->
+
+<!-- ============================================================
+     ADVANCED SMART CHART (Break-Even + Exit + Auto TP)
+============================================================ -->
+
+<h3>Smart Auto Chart (Break-Even + TP + Exit Signals)</h3>
+<div id="smart_chart" class="chart-box"></div>
+
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
+<script>
+
+// Responsive width
+function getChartWidth() {
+    return document.getElementById("smart_chart").clientWidth;
+}
+
+// Create Chart
+const smartChart = LightweightCharts.createChart(
+    document.getElementById("smart_chart"),
+    {
+        width: getChartWidth(),
+        height: 500,
+        layout: { background: { color: "#fff" }, textColor: "#000" },
+        grid: { vertLines: { color: "#eee" }, horzLines: { color: "#eee" } }
+    }
+);
+
+// Auto Resize for responsive layout
+new ResizeObserver(() => {
+    smartChart.applyOptions({ width: getChartWidth() });
+}).observe(document.getElementById("smart_chart"));
+
+const cs = smartChart.addCandlestickSeries();
+
+// Show Loading notice
+document.getElementById("smart_chart").innerHTML = "<b>Loading chart...</b>";
+
+
+// ===================== LOAD DATA ===================== //
+fetch("/api/silver/history/")
+.then(r => r.json())
+.then(data => {
+    document.getElementById("smart_chart").innerHTML = "";
+    cs.setData(data);
+    runSmartLogic(data);
+})
+.catch(err => {
+    document.getElementById("smart_chart").innerHTML =
+        "<b style='color:red;'>Error loading API data</b>";
+});
+
+
+// ===================== PARAMETERS ===================== //
+let ENTRY = 58.20;
+let STOP = 57.80;
+let RISK = ENTRY - STOP;
+let BREAKEVEN = ENTRY + RISK;
+let TP = ENTRY + RISK * 2;
+
+const beLine = smartChart.addLineSeries({ color: "blue", lineWidth: 2 });
+const tpLine = smartChart.addLineSeries({ color: "green", lineWidth: 2 });
+
+
+// ===================== SMART LOGIC ===================== //
+function runSmartLogic(candles) {
+
+    // Draw Lines
+    beLine.setData([
+        { time: candles[0].time, value: BREAKEVEN },
+        { time: candles[candles.length - 1].time, value: BREAKEVEN }
+    ]);
+
+    tpLine.setData([
+        { time: candles[0].time, value: TP },
+        { time: candles[candles.length - 1].time, value: TP }
+    ]);
+
+    let markers = [];
+
+    for (let i = 1; i < candles.length; i++) {
+        const p = candles[i - 1];
+        const c = candles[i];
+
+        // -------------------------
+        // EXIT PATTERNS
+        // -------------------------
+
+        // Bearish Engulfing Exit
+        if (c.open > p.close && c.close < p.open) {
+            markers.push({
+                time: c.time,
+                position: "aboveBar",
+                color: "red",
+                shape: "arrowDown",
+                text: "Bearish Exit"
+            });
+        }
+
+        // Bullish Engulfing Exit
+        if (c.open < p.close && c.close > p.open) {
+            markers.push({
+                time: c.time,
+                position: "belowBar",
+                color: "green",
+                shape: "arrowUp",
+                text: "Bullish Exit"
+            });
+        }
+
+        // -------------------------
+        // AUTO TRAILING TP
+        // -------------------------
+        if (c.high > TP) {
+            TP = c.high - 0.10;
+
+            tpLine.update({
+                time: c.time,
+                value: TP
+            });
+        }
+    }
+
+    cs.setMarkers(markers);
+}
+</script>
+
+</body>
+</html>

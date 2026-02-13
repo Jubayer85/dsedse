@@ -8,7 +8,10 @@ from django.contrib import messages
 from .models import Order, Portfolio
 from .forms import OrderForm
 from decimal import Decimal  # 🧮 Decimal import করো
-
+from django.http import JsonResponse
+import requests
+import datetime
+import time
 
 # 🏠 Home Page View
 def home(request):
@@ -234,3 +237,66 @@ def logout_view(request):
     logout(request)
     messages.success(request, '👋 You have been logged out successfully.')
     return redirect('login')
+
+
+
+# 📉 Chart Page (Requires Login)
+def chart(request):
+    return render(request, "chart.html")
+
+
+def live_prices(request):
+    # EURUSD
+    eurusd = requests.get("https://www.freeforexapi.com/api/live?pairs=EURUSD").json()
+    eurusd_price = eurusd["rates"]["EURUSD"]["rate"]
+
+    # XAGUSD - Silver
+    silver = requests.get(
+        "https://metals-api.com/"
+    ).json()
+    silver_price = silver.get("price", "N/A")
+
+    # GOLD
+    gold = requests.get(
+        "https://api.twelvedata.com/price?symbol=XAU/USD&apikey=YOUR_API_KEY"
+    ).json()
+    gold_price = gold.get("price", "N/A")
+
+    # BTCUSD
+    btc = requests.get(
+        "https://api.twelvedata.com/price?symbol=BTC/USD&apikey=YOUR_API_KEY"
+    ).json()
+    btc_price = btc.get("price", "N/A")
+
+    return JsonResponse({
+        "EURUSD": eurusd_price,
+        "XAGUSD": silver_price,
+        "GOLD": gold_price,
+        "BTCUSD": btc_price,
+    })
+
+def silver_history(request):
+    # Fetch data from TwelveData
+    url = "https://api.twelvedata.com/time_series?symbol=XAGUSD&interval=15min&outputsize=200&apikey=demo"
+
+    response = requests.get(url).json()
+
+    if "values" not in response:
+        return JsonResponse({"error": "API Error", "details": response}, status=400)
+
+    candles = []
+
+    # Convert to LightweightCharts format
+    for item in reversed(response["values"]):
+        dt = datetime.datetime.strptime(item["datetime"], "%Y-%m-%d %H:%M:%S")
+        timestamp = int(time.mktime(dt.timetuple()))
+
+        candles.append({
+            "time": timestamp,
+            "open": float(item["open"]),
+            "high": float(item["high"]),
+            "low": float(item["low"]),
+            "close": float(item["close"])
+        })
+
+    return JsonResponse(candles, safe=False)

@@ -1,187 +1,201 @@
-
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stocklot | Smart Investment Hub</title>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WealthCrest | Portfolio Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2331/2331947.png">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
                     colors: {
-                        primary: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            900: '#14532d',
-                        }
+                        primary: '#1e40af',
+                        secondary: '#1e3a8a',
+                        accent: '#059669',
+                        gold: '#d97706',
+                        dark: '#0f172a',
+                        light: '#f8fafc'
                     },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'gradient': 'gradient 15s ease infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
-                        },
-                        gradient: {
-                            '0%, 100%': { backgroundPosition: '0% 50%' },
-                            '50%': { backgroundPosition: '100% 50%' },
-                        }
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
-    
     <style>
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        body {
+            font-family: 'Inter', sans-serif;
         }
         .gradient-bg {
-            background: linear-gradient(-45deg, #22c55e, #16a34a, #15803d, #14532d);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .stats-gradient {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        .market-up {
+            color: #059669;
+        }
+        .market-down {
+            color: #dc2626;
         }
     </style>
 </head>
-
-<body class="bg-gray-50 text-gray-900 font-sans antialiased">
-
-    <!-- Navigation -->
-    <nav class="fixed w-full top-0 z-150 transition-all duration-500">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16 lg:h-20">
-                <a href="/" class="flex items-center space-x-3 group">
-                    <div class="bg-white p-2 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
-                        <img src="https://cdn-icons-png.flaticon.com/512/2331/2331947.png" alt="Logo" class="w-7 h-7">
-                    </div>
-                    <span class="font-black text-2xl bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">Stocklot</span>
-                </a>
-
-                <div class="hidden lg:flex items-center space-x-10">
-                    <a href="#features" class="text-cyan-400 hover:text-primary-600 font-semibold transition-all duration-300 hover:scale-105">Features</a>
-                    <a href="portfolio" class="text-cyan-400 hover:text-primary-600 font-semibold transition-all duration-300 hover:scale-105">Portfolio</a>
-                    <a href="#contact" class="text-cyan-400 hover:text-primary-600 font-semibold transition-all duration-300 hover:scale-105">Contact</a>
+<body class="bg-gray-50 font-inter">
+    <!-- Header/Navigation -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between py-4">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <i class="fas fa-chart-line text-primary text-2xl mr-2"></i>
+                    <span class="text-xl font-bold text-gray-800">WealthCrest</span>
                 </div>
 
-                <div class="hidden lg:flex items-center space-x-4">
-                    {% if user.is_authenticated %}
-                        <div class="flex items-center space-x-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl shadow-sm">
-                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span class="text-sm font-semibold text-gray-700">Hi, {{ user.username }}</span>
+                <!-- Navigation -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="text-gray-600 hover:text-primary font-medium">Home</a>
+                    <div class="dropdown relative">
+                        <a href="#" class="text-gray-600 hover:text-primary font-medium flex items-center">
+                            Investments <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </a>
+                        <div class="dropdown-menu absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden z-10">
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Stocks</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Bonds</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">ETFs</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Mutual Funds</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Real Estate</a>
                         </div>
-                        <a href="{% url 'logout' %}" class="bg-white text-gray-700 px-6 py-2.5 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300 shadow-sm hover:shadow-md border border-gray-200">Logout</a>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary-600 font-semibold px-6 py-2.5 rounded-xl transition-all duration-300 hover:bg-white/80">Login</a>
-                        <a href="{% url 'register' %}" class="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:shadow-xl transition-all duration-300 shadow-lg hover:scale-105">Get Started</a>
-                    {% endif %}
-                </div>
+                    </div>
+                    <a href="portfolio" class="text-gray-600 hover:text-primary font-medium">Portfolio</a>
+                    <a href="analysis" class="text-gray-600 hover:text-primary font-medium">Technical Analysis</a>
+                    <a href="#" class="text-gray-600 hover:text-primary font-medium">Research</a>
+                    <a href="chart" class="text-gray-600 hover:text-primary font-medium">Chart</a>
+                </nav>
 
-                <button id="menuBtn" class="lg:hidden bg-white p-2 rounded-xl shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
-                    </svg>
-                </button>
+                <!-- Right Menu -->
+                <div class="flex items-center space-x-6">
+                    <!-- Notifications -->
+                    <a href="#" class="text-gray-600 hover:text-primary relative">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">3</span>
+                    </a>
+
+                    <!-- User Account -->
+                    <div class="dropdown relative">
+                        <button class="flex items-center text-gray-600 hover:text-primary">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold">
+                                JD
+                            </div>
+                        </button>
+                        <div class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden z-10">
+                            <a href="portfolio" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Portfolio</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Account Settings</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Billing</a>
+                            <div class="border-t my-1"></div>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sign Out</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </nav>
+    </header>
 
     <!-- Hero Section -->
-    <section class="relative pt-28 pb-20 lg:pt-36 lg:pb-28 overflow-hidden gradient-bg">
-        <div class="absolute inset-0 bg-black/10"></div>
-        <div class="absolute top-10 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-10 right-10 w-96 h-96 bg-primary-300/20 rounded-full blur-3xl"></div>
-        
-        <div class="relative max-w-7xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
-            <div class="text-center lg:text-left text-white">
-                <div class="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-                    <span class="text-sm font-semibold">🚀 The Future of Investing is Here</span>
-                </div>
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight">
-                    Smart Investing <br> 
-                    <span class="bg-gradient-to-r from-white to-primary-100 bg-clip-text text-transparent">Made Simple</span>
-                </h1>
-                <p class="mt-6 text-lg text-blue-100 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                    Harness AI-powered insights, real-time analytics, and professional tools to grow your wealth with confidence.
-                </p>
-                <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                    <a href="{% url 'register' %}" class="group bg-white text-primary-600 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
-                        <span>Start Investing Free</span>
-                        <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                    </a>
-                    <a href="#features" class="group glass text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition-all duration-300 flex items-center justify-center space-x-2">
-                        <i class="fas fa-play-circle"></i>
-                        <span>Watch Demo</span>
-                    </a>
-                </div>
-                
-                <div class="mt-12 flex items-center justify-center lg:justify-start space-x-8 text-blue-100">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold">50K+</div>
-                        <div class="text-sm">Active Investors</div>
+    <section class="gradient-bg text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-6">Smart Investing For Your Financial Future</h1>
+                    <p class="text-xl mb-8 text-blue-100">Professional portfolio management, data-driven insights, and personalized investment strategies to grow your wealth.</p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <button class="bg-accent hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition duration-300">
+                            Get Started
+                        </button>
+                        <button class="bg-transparent hover:bg-white/10 border border-white text-white font-bold py-3 px-8 rounded-lg transition duration-300">
+                            <i class="fas fa-play-circle mr-2"></i> Watch Demo
+                        </button>
                     </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold">$2.1B+</div>
-                        <div class="text-sm">Assets Managed</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold">4.9★</div>
-                        <div class="text-sm">User Rating</div>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="relative">
+                        <div class="absolute -top-10 -left-10 w-64 h-64 bg-white/10 rounded-full blur-xl"></div>
+                        <div class="absolute -bottom-10 -right-10 w-64 h-64 bg-accent/20 rounded-full blur-xl"></div>
+                        <div class="relative bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-2xl">
+                            <div class="bg-white rounded-lg p-4 shadow-lg">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="font-bold text-gray-800">Portfolio Performance</h3>
+                                    <span class="text-accent font-semibold">+12.4%</span>
+                                </div>
+                                <canvas id="performanceChart" height="200"></canvas>
+                                <div class="flex justify-between mt-4 text-sm text-gray-600">
+                                    <span>1M</span>
+                                    <span>3M</span>
+                                    <span>6M</span>
+                                    <span>1Y</span>
+                                    <span class="font-semibold text-gray-800">All</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="relative mt-12 lg:mt-0">
-                <div class="relative animate-float">
-                    <div class="glass rounded-3xl p-6 shadow-2xl backdrop-blur-sm">
-                        <div class="bg-white/20 rounded-2xl p-1">
-                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Dashboard Preview" class="rounded-2xl shadow-2xl">
+        </div>
+    </section>
+
+    <!-- Market Overview -->
+    <section class="py-12 bg-white border-b">
+        <div class="container mx-auto px-4">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Market Overview</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-gray-500 text-sm">S&P 500</h3>
+                            <p class="text-xl font-bold text-gray-800">4,567.25</p>
                         </div>
+                        <span class="market-up text-sm font-semibold">+1.24%</span>
                     </div>
-                    
-                    <!-- Floating elements -->
-                    <div class="absolute -top-4 -left-4 bg-white rounded-2xl p-4 shadow-2xl">
-                        <div class="flex items-center space-x-3">
-                            <div class="bg-green-500 p-2 rounded-xl">
-                                <i class="fas fa-chart-line text-white text-sm"></i>
-                            </div>
-                            <div>
-                                <div class="text-xs text-gray-500">Portfolio</div>
-                                <div class="font-bold text-green-600">+12.4%</div>
-                            </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-gray-500 text-sm">NASDAQ</h3>
+                            <p class="text-xl font-bold text-gray-800">14,346.02</p>
                         </div>
+                        <span class="market-up text-sm font-semibold">+0.87%</span>
                     </div>
-                    
-                    <div class="absolute -bottom-4 -right-4 bg-white rounded-2xl p-4 shadow-2xl">
-                        <div class="flex items-center space-x-3">
-                            <div class="bg-primary-500 p-2 rounded-xl">
-                                <i class="fas fa-bell text-white text-sm"></i>
-                            </div>
-                            <div>
-                                <div class="text-xs text-gray-500">Alerts</div>
-                                <div class="font-bold text-primary-600">3 New</div>
-                            </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-gray-500 text-sm">DOW JONES</h3>
+                            <p class="text-xl font-bold text-gray-800">35,654.29</p>
                         </div>
+                        <span class="market-down text-sm font-semibold">-0.32%</span>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-gray-500 text-sm">BITCOIN</h3>
+                            <p class="text-xl font-bold text-gray-800">$42,876.50</p>
+                        </div>
+                        <span class="market-up text-sm font-semibold">+3.45%</span>
                     </div>
                 </div>
             </div>
@@ -189,254 +203,473 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div class="text-center mb-20">
-                <div class="inline-flex items-center space-x-2 bg-primary-50 text-primary-600 px-4 py-2 rounded-full mb-4">
-                    <span class="text-sm font-semibold">✨ WHY CHOOSE US</span>
-                </div>
-                <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6">
-                    Everything You Need to <br>
-                    <span class="bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">Succeed</span>
-                </h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                    We combine cutting-edge technology with financial expertise to give you the edge in today's markets.
-                </p>
+    <section class="py-16 bg-light">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Professional Investment Management</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Advanced tools and insights to help you make informed investment decisions and optimize your portfolio performance.</p>
             </div>
             
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Feature 1 -->
-                <div class="group bg-gradient-to-br from-white to-gray-50 p-8 rounded-3xl border border-gray-200 hover:border-primary-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-4">
-                    <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                        <i class="fas fa-chart-network text-white text-xl"></i>
+                <div class="bg-white rounded-xl p-6 card-hover shadow-sm">
+                    <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-pie text-primary text-xl"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">AI Portfolio Management</h3>
-                    <p class="text-gray-600 leading-relaxed mb-6">Our advanced algorithms continuously optimize your portfolio based on market conditions and your risk profile.</p>
-                    <ul class="space-y-3">
-                        <li class="flex items-center space-x-3 text-gray-600">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span>Automated rebalancing</span>
-                        </li>
-                        <li class="flex items-center space-x-3 text-gray-600">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span>Risk assessment tools</span>
-                        </li>
-                        <li class="flex items-center space-x-3 text-gray-600">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span>Performance analytics</span>
-                        </li>
-                    </ul>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Portfolio Analytics</h3>
+                    <p class="text-gray-600 mb-4">Deep insights into your portfolio performance, risk exposure, and diversification with advanced analytics.</p>
+                    <a href="#" class="text-primary font-semibold flex items-center">
+                        Learn More <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                    </a>
                 </div>
-
+                
                 <!-- Feature 2 -->
-                <div class="group bg-gradient-to-br from-white to-gray-50 p-8 rounded-3xl border border-gray-200 hover:border-primary-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-4">
-                    <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                        <i class="fas fa-brain text-white text-xl"></i>
+                <div class="bg-white rounded-xl p-6 card-hover shadow-sm">
+                    <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-robot text-accent text-xl"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Smart Market Insights</h3>
-                    <p class="text-gray-600 leading-relaxed mb-6">Get real-time analysis, trend predictions, and actionable insights powered by machine learning and big data.</p>
-                    <ul class="space-y-3">
-                        <li class="flex items-center space-x-3 text-gray-600">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span>Real-time analytics</span>
-                        </li>
-                        <li class="flex items-center space-x-3 text-gray-600">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span>Pattern recognition</span>
-                        </li>
-                        <li class="flex items-center space-x-3 text-gray-600">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span>Sentiment analysis</span>
-                        </li>
-                    </ul>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">AI-Powered Insights</h3>
+                    <p class="text-gray-600 mb-4">Leverage artificial intelligence to identify opportunities and risks in your investment strategy.</p>
+                    <a href="#" class="text-primary font-semibold flex items-center">
+                        Learn More <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                    </a>
                 </div>
-
+                
                 <!-- Feature 3 -->
-                <div class="group bg-gradient-to-br from-white to-gray-50 p-8 rounded-3xl border border-gray-200 hover:border-primary-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-4">
-                    <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                        <i class="fas fa-shield-alt text-white text-xl"></i>
+                <div class="bg-white rounded-xl p-6 card-hover shadow-sm">
+                    <div class="w-12 h-12 bg-gold/10 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-shield-alt text-gold text-xl"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Secure & Compliant</h3>
-                    <p class="text-gray-600 leading-relaxed mb-6">Bank-level security with full regulatory compliance ensures your investments and data are always protected.</p>
-                    <ul class="space-y-3">
-                        <li class="flex items-center space-x-3 text-gray-600">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span>256-bit encryption</span>
-                        </li>
-                        <li class="flex items-center space-x-3 text-gray-600">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span>Two-factor authentication</span>
-                        </li>
-                        <li class="flex items-center space-x-3 text-gray-600">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span>Regular security audits</span>
-                        </li>
-                    </ul>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Risk Management</h3>
+                    <p class="text-gray-600 mb-4">Advanced risk assessment tools to protect your investments and optimize your risk-return profile.</p>
+                    <a href="#" class="text-primary font-semibold flex items-center">
+                        Learn More <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Overview -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Your Portfolio Overview</h2>
+                <button class="bg-primary hover:bg-secondary text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
+                    View Full Portfolio
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Portfolio Value -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">Portfolio Value</h3>
+                        <div class="flex space-x-2">
+                            <button class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded">1D</button>
+                            <button class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded">1W</button>
+                            <button class="text-xs bg-primary text-white px-3 py-1 rounded">1M</button>
+                            <button class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded">1Y</button>
+                            <button class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded">All</button>
+                        </div>
+                    </div>
+                    <div class="flex items-end mb-4">
+                        <span class="text-3xl font-bold text-gray-800">$247,893.45</span>
+                        <span class="text-accent ml-2 font-semibold">+$12,456.23 (5.3%)</span>
+                    </div>
+                    <canvas id="portfolioChart" height="250"></canvas>
+                </div>
+                
+                <!-- Asset Allocation -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Asset Allocation</h3>
+                    <div class="flex justify-center mb-6">
+                        <canvas id="allocationChart" width="200" height="200"></canvas>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                                <span class="text-gray-700">Stocks</span>
+                            </div>
+                            <span class="font-semibold text-gray-800">62%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                                <span class="text-gray-700">Bonds</span>
+                            </div>
+                            <span class="font-semibold text-gray-800">24%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                                <span class="text-gray-700">Real Estate</span>
+                            </div>
+                            <span class="font-semibold text-gray-800">8%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                                <span class="text-gray-700">Cash</span>
+                            </div>
+                            <span class="font-semibold text-gray-800">6%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Investment Products -->
+    <section class="py-16 bg-light">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Investment Products</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Diversify your portfolio with our carefully curated selection of investment products.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Product 1 -->
+                <div class="bg-white rounded-xl p-6 card-hover shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-bar text-blue-500 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Stocks</h3>
+                    <p class="text-gray-600 text-sm mb-4">Invest in individual company stocks with comprehensive research and analysis.</p>
+                    <a href="#" class="text-primary font-semibold text-sm">Explore →</a>
+                </div>
+                
+                <!-- Product 2 -->
+                <div class="bg-white rounded-xl p-6 card-hover shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-hand-holding-usd text-green-500 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Bonds</h3>
+                    <p class="text-gray-600 text-sm mb-4">Fixed income securities for stable returns and portfolio diversification.</p>
+                    <a href="#" class="text-primary font-semibold text-sm">Explore →</a>
+                </div>
+                
+                <!-- Product 3 -->
+                <div class="bg-white rounded-xl p-6 card-hover shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-boxes text-purple-500 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">ETFs</h3>
+                    <p class="text-gray-600 text-sm mb-4">Diversified exchange-traded funds across various sectors and markets.</p>
+                    <a href="#" class="text-primary font-semibold text-sm">Explore →</a>
+                </div>
+                
+                <!-- Product 4 -->
+                <div class="bg-white rounded-xl p-6 card-hover shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-home text-red-500 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Real Estate</h3>
+                    <p class="text-gray-600 text-sm mb-4">REITs and property investments for portfolio diversification and income.</p>
+                    <a href="#" class="text-primary font-semibold text-sm">Explore →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 stats-gradient text-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <div class="text-4xl font-bold mb-2">$4.2B+</div>
+                    <div class="text-green-100">Assets Under Management</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold mb-2">45,000+</div>
+                    <div class="text-green-100">Active Investors</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold mb-2">12.8%</div>
+                    <div class="text-green-100">Average Annual Return</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold mb-2">98%</div>
+                    <div class="text-green-100">Client Satisfaction</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">What Our Investors Say</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Hear from our clients who have achieved their financial goals with our platform.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-light rounded-xl p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-primary font-bold">SR</span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Sarah Johnson</h4>
+                            <p class="text-gray-600 text-sm">Portfolio Manager</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"WealthCrest has transformed how I manage my clients' portfolios. The analytics and insights are unparalleled in the industry."</p>
+                    <div class="flex text-yellow-400 mt-4">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-light rounded-xl p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-accent font-bold">MR</span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Michael Roberts</h4>
+                            <p class="text-gray-600 text-sm">Retired Executive</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"As someone new to investing, WealthCrest made it easy to understand and grow my retirement portfolio. The guidance is exceptional."</p>
+                    <div class="flex text-yellow-400 mt-4">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-light rounded-xl p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-gold/10 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-gold font-bold">JD</span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Jennifer Davis</h4>
+                            <p class="text-gray-600 text-sm">Small Business Owner</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"The risk management tools helped me protect my investments during market volatility. I've seen consistent growth with peace of mind."</p>
+                    <div class="flex text-yellow-400 mt-4">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 bg-gradient-to-r from-primary-900 to-primary-800 relative overflow-hidden">
-        <div class="absolute inset-0 bg-black/20"></div>
-        <div class="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-black/10 to-transparent"></div>
-        
-        <div class="relative max-w-4xl mx-auto text-center px-6">
-            <h2 class="text-4xl md:text-5xl font-black text-white mb-6">
-                Ready to Transform Your <br>
-                <span class="bg-gradient-to-r from-primary-200 to-white bg-clip-text text-transparent">Investment Journey?</span>
-            </h2>
-            <p class="text-xl text-primary-100 mb-10 max-w-2xl mx-auto leading-relaxed">
-                Join thousands of smart investors who are already building wealth with Stocklot.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{% url 'register' %}" class="group bg-white text-primary-600 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 shadow-lg flex items-center justify-center space-x-3">
-                    <span>Start Free Trial</span>
-                    <i class="fas fa-rocket group-hover:scale-110 transition-transform"></i>
-                </a>
-                <a href="#contact" class="group border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-primary-600 transition-all duration-300 flex items-center justify-center space-x-3">
-                    <i class="fas fa-calendar"></i>
-                    <span>Book Demo</span>
-                </a>
-            </div>
-            <p class="text-primary-200 mt-6 text-sm">No credit card required • 14-day free trial</p>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="py-20 bg-white">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <div class="inline-flex items-center space-x-2 bg-primary-50 text-primary-600 px-4 py-2 rounded-full mb-4">
-                <span class="text-sm font-semibold">📞 GET IN TOUCH</span>
-            </div>
-            <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6">
-                Let's Build Your <br>
-                <span class="bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">Financial Future</span>
-            </h2>
-            <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-                Our team of experts is here to help you succeed. Reach out for personalized guidance.
-            </p>
-            <div class="grid md:grid-cols-3 gap-8 mt-12">
-                <div class="text-center p-8 rounded-3xl bg-gradient-to-b from-gray-50 to-white border border-gray-200 hover:shadow-xl transition-all duration-300">
-                    <div class="bg-primary-100 text-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-envelope text-xl"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Email Us</h3>
-                    <p class="text-primary-600 font-semibold">support@stocklot.com</p>
-                </div>
-                <div class="text-center p-8 rounded-3xl bg-gradient-to-b from-gray-50 to-white border border-gray-200 hover:shadow-xl transition-all duration-300">
-                    <div class="bg-primary-100 text-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-phone text-xl"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Call Us</h3>
-                    <p class="text-primary-600 font-semibold">+1 (555) 123-4567</p>
-                </div>
-                <div class="text-center p-8 rounded-3xl bg-gradient-to-b from-gray-50 to-white border border-gray-200 hover:shadow-xl transition-all duration-300">
-                    <div class="bg-primary-100 text-primary-600 rounded-2xl h-14 w-14 flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-comments text-xl"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Live Chat</h3>
-                    <p class="text-primary-600 font-semibold">24/7 Support</p>
-                </div>
+    <section class="py-16 gradient-bg text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-4">Ready to Grow Your Wealth?</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto text-blue-100">Join thousands of investors who trust WealthCrest with their financial future.</p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <button class="bg-accent hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition duration-300">
+                    Open an Account
+                </button>
+                <button class="bg-transparent hover:bg-white/10 border border-white text-white font-bold py-3 px-8 rounded-lg transition duration-300">
+                    Schedule a Consultation
+                </button>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-primary-600"></div>
-        
-        <div class="relative max-w-7xl mx-auto py-16 px-6 lg:px-8">
-            <div class="grid lg:grid-cols-4 gap-12">
-                <!-- Brand -->
-                <div class="lg:col-span-1">
-                    <a href="/" class="flex items-center space-x-3 mb-6">
-                        <div class="bg-white p-2 rounded-xl">
-                            <img src="https://cdn-icons-png.flaticon.com/512/2331/2331947.png" alt="Logo" class="w-7 h-7">
-                        </div>
-                        <span class="font-black text-2xl text-white">Stocklot</span>
-                    </a>
-                    <p class="text-gray-400 mb-6 leading-relaxed">
-                        Empowering investors with AI-driven insights and professional tools for smarter wealth creation.
-                    </p>
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-chart-line text-primary text-2xl mr-2"></i>
+                        <span class="text-xl font-bold">WealthCrest</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">Professional portfolio management and investment advisory services for individuals and institutions.</p>
                     <div class="flex space-x-4">
-                        <a href="#" class="bg-gray-800 p-3 rounded-xl hover:bg-primary-600 transition-all duration-300">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="bg-gray-800 p-3 rounded-xl hover:bg-primary-600 transition-all duration-300">
-                            <i class="fab fa-linkedin"></i>
-                        </a>
-                        <a href="#" class="bg-gray-800 p-3 rounded-xl hover:bg-primary-600 transition-all duration-300">
-                            <i class="fab fa-facebook"></i>
-                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
-
-                <!-- Links -->
-                <div class="grid grid-cols-2 lg:grid-cols-3 gap-8 lg:col-span-3">
-                    <div>
-                        <h3 class="text-lg font-bold text-white mb-6">Platform</h3>
-                        <ul class="space-y-4">
-                            <li><a href="#features" class="text-gray-400 hover:text-white transition-colors duration-300">Features</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Pricing</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Security</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">API</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white mb-6">Company</h3>
-                        <ul class="space-y-4">
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">About Us</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Careers</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Blog</a></li>
-                            <li><a href="#contact" class="text-gray-400 hover:text-white transition-colors duration-300">Contact</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white mb-6">Resources</h3>
-                        <ul class="space-y-4">
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Help Center</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Community</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Privacy Policy</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Terms of Service</a></li>
-                        </ul>
-                    </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Services</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Portfolio Management</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Investment Advisory</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Retirement Planning</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Tax Optimization</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Wealth Transfer</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Resources</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Market Research</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Investment Guides</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Financial Calculators</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Blog & Insights</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Webinars</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Contact</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
+                            123 Financial District, NYC
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-2 text-primary"></i>
+                            +1 (555) 123-4567
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2 text-primary"></i>
+                            info@wealthcrest.com
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-clock mr-2 text-primary"></i>
+                            Mon-Fri: 9AM-6PM EST
+                        </li>
+                    </ul>
                 </div>
             </div>
             
-            <div class="mt-16 pt-8 border-t border-gray-800 text-center text-gray-400">
-                <p>&copy; {% if now %}{{ now|date:"Y" }}{% else %}2025{% endif %} Stocklot. All rights reserved. Built with ❤️ for smart investors.</p>
+            <div class="border-t border-gray-700 mt-12 pt-8 text-center text-gray-400">
+                <p>&copy; 2023 WealthCrest Financial. All rights reserved. | <a href="#" class="hover:text-white">Privacy Policy</a> | <a href="#" class="hover:text-white">Terms of Service</a></p>
             </div>
         </div>
     </footer>
 
     <script>
-        const menuBtn = document.getElementById("menuBtn");
-        const mobileMenu = document.getElementById("mobileMenu");
-        
-        menuBtn.addEventListener("click", () => {
-            mobileMenu.classList.toggle("hidden");
-        });
-
-        // Close menu when a link is clicked
-        const mobileLinks = document.querySelectorAll('#mobileMenu a');
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
+        // Initialize charts when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            const performanceChart = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Portfolio Value',
+                        data: [100, 105, 110, 115, 120, 125, 130, 128, 135, 140, 145, 150],
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
             });
-        });
 
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            const nav = document.querySelector('nav');
-            if (window.scrollY > 100) {
-                nav.classList.add('bg-white/95', 'shadow-lg', 'backdrop-blur-md');
-                nav.classList.remove('bg-transparent');
-            } else {
-                nav.classList.remove('bg-white/95', 'shadow-lg');
-                nav.classList.add('bg-transparent');
-            }
+            // Portfolio Chart
+            const portfolioCtx = document.getElementById('portfolioChart').getContext('2d');
+            const portfolioChart = new Chart(portfolioCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30'],
+                    datasets: [{
+                        label: 'Portfolio Value',
+                        data: [235, 237, 236, 238, 240, 242, 241, 243, 245, 244, 246, 245, 247, 248, 247, 249, 248, 250, 249, 248, 247, 246, 245, 247, 248, 247, 248, 249, 248, 247.8],
+                        borderColor: '#1e40af',
+                        backgroundColor: 'rgba(30, 64, 175, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value + 'k';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Allocation Chart
+            const allocationCtx = document.getElementById('allocationChart').getContext('2d');
+            const allocationChart = new Chart(allocationCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Stocks', 'Bonds', 'Real Estate', 'Cash'],
+                    datasets: [{
+                        data: [62, 24, 8, 6],
+                        backgroundColor: [
+                            '#3b82f6',
+                            '#10b981',
+                            '#8b5cf6',
+                            '#f59e0b'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
         });
     </script>
 </body>
