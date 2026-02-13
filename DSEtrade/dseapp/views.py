@@ -300,3 +300,25 @@ def silver_history(request):
         })
 
     return JsonResponse(candles, safe=False)
+
+
+# 📈 Analysis Page (Requires Login)
+# সহজ version - শুধু analysis function যোগ করুন
+@login_required
+def analysis(request):
+    """Simple analysis page"""
+    from .models import Portfolio, Order
+    
+    portfolio, _ = Portfolio.objects.get_or_create(id=1)
+    orders = Order.objects.all()
+    
+    context = {
+        'portfolio': portfolio,
+        'orders': orders,
+        'total_orders': orders.count(),
+        'open_orders': orders.filter(is_closed=False).count(),
+        'closed_orders': orders.filter(is_closed=True).count(),
+    }
+    
+    return render(request, 'analysis.html', context)
+
