@@ -18,7 +18,7 @@ urlpatterns = [
     path('update_closed_order_balance/', views.update_closed_order_balance, name='update_closed_order_balance'),
     path('chart/', views.chart, name='chart'),
     path('analysis/', views.analysis, name='analysis'), 
-    path("api/signal/current/", current_signal), 
+     path("api/signal/", current_signal), 
     
 
 

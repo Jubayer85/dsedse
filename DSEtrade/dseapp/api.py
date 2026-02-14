@@ -3,10 +3,11 @@ from rest_framework.response import Response
 from dseapp.signals.smc_engine import SMCSignalEngine
 
 
-@api_view(["POST"])
+@api_view(["GET"])
 def current_signal(request):
 
-    candles = request.data.get("candles", [])
+    # এখানে ideally আপনার DB বা loader থাকবে
+    candles = []  # temporarily dummy
 
     engine = SMCSignalEngine(candles)
     result = engine.analyze()
