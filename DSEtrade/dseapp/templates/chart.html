@@ -7,12 +7,18 @@
         body {
             font-family: Arial;
             background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2, h3 {
+            text-align: center;
         }
 
         .chart-box {
             width: 100%;
             height: 500px;
-            margin-bottom: 30px;
+            margin-top: 20px;
         }
 
         .signal-box {
@@ -23,6 +29,7 @@
             font-weight: bold;
             text-align: center;
             font-size: 22px;
+            background: #444;
         }
 
         .indicator-panel {
@@ -41,21 +48,41 @@
             text-align: center;
         }
 
+        .selector-box {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        select {
+            padding: 8px;
+            font-size: 16px;
+        }
+
     </style>
 </head>
 
 <body>
 
-<h2 style="text-align:center;">📊 SMC Live Trading Dashboard</h2>
+<h2>📊 SMC Live Trading Dashboard</h2>
+
+<!-- ================= INSTRUMENT SELECTOR ================= -->
+<div class="selector-box">
+    <label>Select Instrument:</label>
+    <select id="symbol_select" onchange="changeInstrument()">
+        <option value="EURUSD">EURUSD</option>
+        <option value="XAUUSD">XAUUSD</option>
+        <option value="XAGUSD">XAGUSD</option>
+        <option value="BTCUSD">BTCUSD</option>
+    </select>
+</div>
 
 <!-- ================= SIGNAL OUTPUT ================= -->
-<div id="signal_output" class="signal-box" style="background:#444;">
+<div id="signal_output" class="signal-box">
     Loading SMC Signal...
 </div>
 
 <!-- ================= INDICATORS ================= -->
 <div class="indicator-panel">
-
     <div class="card">
         <h4>Live Price</h4>
         <div id="live_price">--</div>
@@ -70,99 +97,72 @@
         <h4>Confidence</h4>
         <div id="confidence">--</div>
     </div>
-
 </div>
 
 <!-- ================= TRADINGVIEW CHART ================= -->
-<h3>EUR/USD Live Chart</h3>
-<div id="eurusd_chart" class="chart-box"></div>
+<h3 id="chart_title">EURUSD Chart</h3>
+<div id="main_chart" class="chart-box"></div>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <script>
-new TradingView.widget({
-    "width": "100%",
-    "height": 500,
-    "symbol": "FX:EURUSD",
-    "interval": "15",
-    "timezone": "Asia/Dhaka",
-    "theme": "light",
-    "container_id": "eurusd_chart"
-});
-</script>
 
-<h3>Silver (XAGUSD)</h3>
-<div id="silver_chart" class="chart-box"></div>
+let currentSymbol = "EURUSD";
+let tvWidget = null;
 
-<script>
-new TradingView.widget({
-    "width": "100%",
-    "height": 500,
-    "symbol": "OANDA:XAGUSD",
-    "interval": "15",
-    "timezone": "Asia/Dhaka",
-    "theme": "light",
-    "container_id": "silver_chart"
-});
-</script>
+const symbolMap = {
+    "EURUSD": "FX:EURUSD",
+    "XAUUSD": "OANDA:XAUUSD",
+    "XAGUSD": "OANDA:XAGUSD",
+    "BTCUSD": "COINBASE:BTCUSD"
+};
 
-<h3>Gold (XAUUSD)</h3>
-<div id="gold_chart" class="chart-box"></div>
+function loadChart(symbol) {
 
-<script>
-new TradingView.widget({
-    "width": "100%",
-    "height": 500,
-    "symbol": "OANDA:XAUUSD",
-    "interval": "15",
-    "timezone": "Asia/Dhaka",
-    "theme": "light",
-    "container_id": "gold_chart"
-});
-</script>
+    if (tvWidget) {
+        tvWidget.remove();
+    }
 
-<h3>BTC/USD</h3>
-<div id="btc_chart" class="chart-box"></div>
+    tvWidget = new TradingView.widget({
+        "width": "100%",
+        "height": 500,
+        "symbol": symbolMap[symbol],
+        "interval": "15",
+        "timezone": "Asia/Dhaka",
+        "theme": "light",
+        "container_id": "main_chart"
+    });
 
-<script>
-new TradingView.widget({
-    "width": "100%",
-    "height": 500,
-    "symbol": "COINBASE:BTCUSD",
-    "interval": "15",
-    "timezone": "Asia/Dhaka",
-    "theme": "light",
-    "container_id": "btc_chart"
-});
-</script>
+    document.getElementById("chart_title").innerText = symbol + " Chart";
+}
 
-
-<!-- ================= BACKEND SMC SIGNAL ================= -->
-
-<script>
+function changeInstrument() {
+    currentSymbol = document.getElementById("symbol_select").value;
+    loadChart(currentSymbol);
+    loadSMCSignal();
+}
 
 async function loadSMCSignal() {
 
     try {
-        const response = await fetch("/api/signal/");
+        const response = await fetch(`/api/signal/?symbol=${currentSymbol}`);
         const data = await response.json();
 
         const box = document.getElementById("signal_output");
 
         if (data.signal === "BUY") {
             box.style.background = "green";
-            box.innerHTML = "🚀 BUY SIGNAL (SMC)";
+            box.innerHTML = `🚀 BUY SIGNAL (${currentSymbol})`;
         }
         else if (data.signal === "SELL") {
             box.style.background = "red";
-            box.innerHTML = "🔻 SELL SIGNAL (SMC)";
+            box.innerHTML = `🔻 SELL SIGNAL (${currentSymbol})`;
         }
         else {
             box.style.background = "#444";
-            box.innerHTML = "😴 NO TRADE (SMC)";
+            box.innerHTML = `😴 NO TRADE (${currentSymbol})`;
         }
 
-        // Extra Info
         document.getElementById("structure").innerText =
             data.structure || "--";
 
@@ -178,6 +178,7 @@ async function loadSMCSignal() {
 }
 
 // Initial Load
+loadChart(currentSymbol);
 loadSMCSignal();
 
 // Auto Refresh Every 5 Seconds

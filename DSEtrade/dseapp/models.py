@@ -167,3 +167,21 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.instrument} | Qty: {self.quantity} | Cost: {self.cost_price} | Market: {self.market_price}"
+    
+
+
+
+    
+class Candle(models.Model):
+    symbol = models.CharField(max_length=20)
+    timeframe = models.CharField(max_length=10)
+    time = models.DateTimeField()
+
+    open = models.FloatField()
+    high = models.FloatField()
+    low = models.FloatField()
+    close = models.FloatField()
+
+    def __str__(self):
+        return f"{self.symbol} {self.timeframe} {self.time}"
+
