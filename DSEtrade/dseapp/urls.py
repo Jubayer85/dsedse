@@ -2,9 +2,11 @@ from django.urls import path
 
 from dseapp.api import current_signal 
 from . import views
+app_name = "dseapp"
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path("about/", views.about, name="about"),
     path('portfolio/', views.portfolio, name='portfolio'),
     path('order/create/', views.order_create, name='order_create'),
     path('update_market_price/', views.update_market_price, name='update_market_price'),
