@@ -1,8 +1,7 @@
-# dseapp/signals/smc_engine.py
-
 from .structure import detect_structure
 from .liquidity import detect_liquidity
 from .breaker import detect_breaker
+
 
 class SMCSignalEngine:
 
@@ -10,20 +9,38 @@ class SMCSignalEngine:
         self.candles = candles
 
     def analyze(self):
+
         structure = detect_structure(self.candles)
         liquidity = detect_liquidity(self.candles)
         breaker = detect_breaker(self.candles)
 
-        if structure == "bearish" and liquidity and breaker:
-            return {
-                "signal": "SELL",
-                "confidence": "HIGH"
-            }
+        confidence = 0
 
-        if structure == "bullish" and liquidity and breaker:
-            return {
-                "signal": "BUY",
-                "confidence": "HIGH"
-            }
+        # Structure weight
+        if structure in ["bullish", "bearish"]:
+            confidence += 40
 
-        return {"signal": "NO_TRADE"}
+        # Liquidity weight
+        if liquidity:
+            confidence += 30
+
+        # Breaker weight
+        if breaker:
+            confidence += 30
+
+        # Final Signal Decision
+        if confidence >= 70:
+            if structure == "bullish":
+                signal = "BUY"
+            elif structure == "bearish":
+                signal = "SELL"
+            else:
+                signal = "NO_TRADE"
+        else:
+            signal = "NO_TRADE"
+
+        return {
+            "signal": signal,
+            "structure": structure,
+            "confidence": confidence
+        }

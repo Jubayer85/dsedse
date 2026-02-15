@@ -1,6 +1,7 @@
 from django.urls import path
+from dseapp.api import CurrentSignalView
 
-from dseapp.api import current_signal 
+#from dseapp.api import current_signal 
 from . import views
 app_name = "dseapp"
 
@@ -20,8 +21,9 @@ urlpatterns = [
     path('update_closed_order_balance/', views.update_closed_order_balance, name='update_closed_order_balance'),
     path('chart/', views.chart, name='chart'),
     path('analysis/', views.analysis, name='analysis'), 
-     path("api/signal/", current_signal), 
-    
+     #path("api/signal/", current_signal), 
+    path("api/signal/", CurrentSignalView.as_view(), name="current-signal"),
+
 
 
 
