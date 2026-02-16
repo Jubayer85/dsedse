@@ -195,14 +195,14 @@
         /* dynamic signal classes – light mode */
         .signal-box.buy-light {
             background: linear-gradient(145deg, #ffffff, #f0f9f0);
-            border-left: 8px solid #1f9a5e;
+            border-left: 8px solid #115836;
             box-shadow: 0 15px 30px -15px #1f9a5e40, 0 0 0 1px #cae3d6;
         }
 
         .signal-box.sell-light {
-            background: linear-gradient(145deg, #ffffff, #fff2f2);
-            border-left: 8px solid #d1434b;
-            box-shadow: 0 15px 30px -15px #d1434b30, 0 0 0 1px #fad7d7;
+            background: linear-gradient(145deg, #e99580, #e68787);
+            border-left: 8px solid #cf131d;
+            box-shadow: 0 15px 30px -15px #d1434b30, 0 0 0 1px #f54418;
         }
 
         .signal-box.neutral-light {
@@ -293,10 +293,11 @@
             <div class="selector-item">
                 <label><i class="far fa-clock" style="margin-right: 5px;"></i> INSTRUMENT</label>
                 <select id="symbol_select" onchange="updateDashboard()">
-                    <option value="EURUSD">EURUSD</option>
-                    <option value="XAUUSD">XAUUSD</option>
-                    <option value="XAGUSD">XAGUSD</option>
-                    <option value="BTCUSD">BTCUSD</option>
+                    <option value="EURUSDT">EURUSDT</option>
+                    <option value="XAUUSDT">XAUUSD</option>
+                    <option value="XAGUSDT">XAGUSD</option>
+                    <option value="BTCUSDT">BTCUSDT</option>
+                    <option value="ETHUSDT">ETHUSDT</option>
                 </select>
             </div>
             <div class="selector-item">
@@ -369,11 +370,12 @@
 
         // --- same mappings (untouched) ---
         const symbolMap = {
-            "EURUSD": "FX:EURUSD",
-            "XAUUSD": "OANDA:XAUUSD",
-            "XAGUSD": "OANDA:XAGUSD",
-            "BTCUSD": "COINBASE:BTCUSD"
-        };
+    "EURUSDT": "BINANCE:EURUSDT",
+    "XAUUSDT": "BINANCE:XAUUSDT",
+    "XAGUSDT": "BINANCE:XAGUSDT",
+    "ETHUSDT": "BINANCE:ETHUSDT",
+    "BTCUSDT": "BINANCE:BTCUSDT"
+};
 
         const intervalMap = {
             "M1": "1",
