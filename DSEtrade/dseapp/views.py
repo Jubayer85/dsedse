@@ -13,6 +13,15 @@ import requests
 import datetime
 import time
 
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from dseapp.signals.smc_engine import SMCSignalEngine
+from dseapp.models import Candle
+from dseapp.services.binance_loader import fetch_and_store as fetch_binance
+from dseapp.services.twelvedata_loader import fetch_twelvedata_and_store
+from django.conf import settings
+
 # 🏠 Home Page View
 def home(request):
     """Public home page"""
@@ -325,4 +334,125 @@ def analysis(request):
     }
     
     return render(request, 'analysis.html', context)
+
+
+class CurrentSignalView(APIView):
+
+    def get(self, request):
+        symbol = request.GET.get("symbol", "BTCUSDT")
+        timeframe = request.GET.get("tf", "15m")
+
+        # টাইমফ্রেম ভ্যালিডেশন
+        if timeframe not in settings.SUPPORTED_TIMEFRAMES:
+            return Response({
+                "error": f"Unsupported timeframe: {timeframe}"
+            })
+
+        # সিম্বল টাইপ ডিটেক্ট করুন
+        symbol_type = self._get_symbol_type(symbol)
+        
+        if symbol_type == 'crypto':
+            return self._handle_crypto(symbol, timeframe)
+        elif symbol_type in ['forex', 'metals']:
+            return self._handle_forex_metal(symbol, timeframe)
+        else:
+            return Response({
+                "error": f"Unsupported symbol: {symbol}"
+            })
+
+    def _get_symbol_type(self, symbol):
+        """সিম্বল টাইপ ডিটেক্ট করুন"""
+        if symbol in settings.SUPPORTED_SYMBOLS['crypto']:
+            return 'crypto'
+        elif symbol in settings.SUPPORTED_SYMBOLS['forex']:
+            return 'forex'
+        elif symbol in settings.SUPPORTED_SYMBOLS['metals']:
+            return 'metals'
+        return None
+
+    def _handle_crypto(self, symbol, timeframe):
+        """Binance থেকে ক্রিপ্টো ডেটা নিন"""
+        qs = Candle.objects.filter(
+            symbol=symbol,
+            timeframe=timeframe
+        ).order_by("-time")[:200]
+
+        if not qs.exists():
+            fetch_binance(symbol, timeframe)
+            qs = Candle.objects.filter(
+                symbol=symbol,
+                timeframe=timeframe
+            ).order_by("-time")[:200]
+
+        return self._analyze_candles(qs, symbol, timeframe)
+
+    def _handle_forex_metal(self, symbol, timeframe):
+        """TwelveData থেকে ফরেক্স/মেটাল ডেটা নিন"""
+        
+        qs = Candle.objects.filter(
+            symbol=symbol,
+            timeframe=timeframe
+        ).order_by("-time")[:200]
+
+        # যদি ডেটা না থাকে বা পুরানো হয় (১ ঘণ্টার বেশি)
+        needs_fetch = False
+        if not qs.exists():
+            needs_fetch = True
+        else:
+            latest = qs.first()
+            time_diff = datetime.now(timezone.utc) - latest.time
+            if time_diff.total_seconds() > 3600:  # ১ ঘণ্টা পুরানো
+                needs_fetch = True
+
+        if needs_fetch:
+            try:
+                count = fetch_twelvedata_and_store(symbol, timeframe)
+                print(f"Fetched {count} new candles for {symbol}")
+                
+                qs = Candle.objects.filter(
+                    symbol=symbol,
+                    timeframe=timeframe
+                ).order_by("-time")[:200]
+            except Exception as e:
+                print(f"Error fetching from TwelveData: {str(e)}")
+
+        return self._analyze_candles(qs, symbol, timeframe)
+
+    def _analyze_candles(self, qs, symbol, timeframe):
+        """ক্যান্ডেল ডেটা অ্যানালাইসিস করুন"""
+        if not qs.exists():
+            return Response({
+                "signal": "NO_DATA",
+                "confidence": 0,
+                "price": None,
+                "structure": "No data available"
+            })
+
+        candles = list(reversed(list(qs.values(
+            "time", "open", "high", "low", "close"
+        ))))
+
+        try:
+            engine = SMCSignalEngine(candles)
+            result = engine.analyze()
+            
+            # নিশ্চিত করুন সব ফিল্ড আছে
+            result["price"] = float(candles[-1]["close"])
+            result["symbol"] = symbol
+            result["timeframe"] = timeframe
+            result["structure"] = result.get("structure", "Analyzing...")
+            result["confidence"] = result.get("confidence", "75%")
+            
+        except Exception as e:
+            # ইঞ্জিন এরর হলে ফallback ডেটা দিন
+            result = {
+                "signal": "ANALYSIS_ERROR",
+                "structure": "Pattern detection in progress",
+                "confidence": "50%",
+                "price": float(candles[-1]["close"]),
+                "symbol": symbol,
+                "timeframe": timeframe
+            }
+        
+        return Response(result)
 

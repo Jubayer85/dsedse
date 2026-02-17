@@ -23,6 +23,7 @@ urlpatterns = [
     path('analysis/', views.analysis, name='analysis'), 
      #path("api/signal/", current_signal), 
     path("api/signal/", CurrentSignalView.as_view(), name="current-signal"),
+    
 
 
 
