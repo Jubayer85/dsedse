@@ -9,4 +9,19 @@ class ContactAdmin(admin.ModelAdmin):
     admin.site.register(Order)
 
 
-admin.site.register(Candle)
+#admin.site.register(Candle)
+@admin.register(Candle)
+class CandleAdmin(admin.ModelAdmin):
+    list_display = (
+        "symbol",
+        "timeframe",
+        "time",
+        "open",
+        "high",
+        "low",
+        "close",
+    )
+
+    list_filter = ("symbol", "timeframe")
+    search_fields = ("symbol",)
+    ordering = ("-time",)
