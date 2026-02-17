@@ -136,7 +136,47 @@
             border: 1px solid #2d314d;
             overflow: hidden;
             display: flex;
+<<<<<<< HEAD
             flex-direction: column;
+=======
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            transition: 0.15s;
+            border-left: 8px solid transparent;
+        }
+
+        .signal-box i {
+            font-size: 2.4rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
+        }
+
+        /* dynamic signal classes – light mode */
+        .signal-box.buy-light {
+            background: linear-gradient(145deg, #ffffff, #f0f9f0);
+            border-left: 8px solid #115836;
+            box-shadow: 0 15px 30px -15px #1f9a5e40, 0 0 0 1px #cae3d6;
+        }
+
+        .signal-box.sell-light {
+            background: linear-gradient(145deg, #e99580, #e68787);
+            border-left: 8px solid #cf131d;
+            box-shadow: 0 15px 30px -15px #d1434b30, 0 0 0 1px #f54418;
+        }
+
+        .signal-box.neutral-light {
+            background: #ffffff;
+            border-left: 8px solid #8399b8;
+            box-shadow: 0 10px 25px -15px #3f5b7b60, 0 0 0 1px #d6e2f0;
+        }
+
+        /* Chart card – light, clean */
+        .chart-wrapper {
+            background: #ffffff;
+            border-radius: 38px;
+            padding: 24px 24px 24px 24px;
+            box-shadow: 0 25px 40px -28px #1d3f5f, 0 0 0 1px #d9e6f2;
+>>>>>>> fd81dee67ea591837a38a09f39726a7629bf5b6e
         }
 
         .chart-header {
@@ -178,6 +218,34 @@
                 <option value="BTCUSD">BTCUSD</option>
             </select>
         </div>
+<<<<<<< HEAD
+=======
+        <div class="selector-panel">
+            <div class="selector-item">
+                <label><i class="far fa-clock" style="margin-right: 5px;"></i> INSTRUMENT</label>
+                <select id="symbol_select" onchange="updateDashboard()">
+                    <option value="EURUSDT">EURUSDT</option>
+                    <option value="XAUUSDT">XAUUSD</option>
+                    <option value="XAGUSDT">XAGUSD</option>
+                    <option value="BTCUSDT">BTCUSDT</option>
+                    <option value="ETHUSDT">ETHUSDT</option>
+                </select>
+            </div>
+            <div class="selector-item">
+                <label><i class="fas fa-chart-bar" style="margin-right: 5px;"></i> TIMEFRAME</label>
+                <select id="tf_select" onchange="updateDashboard()">
+                    <option value="M1">1m</option>
+                    <option value="M5">5m</option>
+                    <option value="M15" selected>15m</option>
+                    <option value="M30">30m</option>
+                    <option value="H1">1H</option>
+                    <option value="H4">4H</option>
+                    <option value="D1">1D</option>
+                </select>
+            </div>
+        </div>
+    </div>
+>>>>>>> fd81dee67ea591837a38a09f39726a7629bf5b6e
 
         <div>
             <label style="font-size: 12px; color: var(--text-dim);">TIMEFRAME</label><br>
@@ -233,11 +301,21 @@
 <script>
 let tvWidget = null;
 
+<<<<<<< HEAD
 const symbolMap = {
     "EURUSD": "FX:EURUSD",
     "XAUUSD": "OANDA:XAUUSD",
     "XAGUSD": "OANDA:XAGUSD",
     "BTCUSD": "COINBASE:BTCUSD"
+=======
+        // --- same mappings (untouched) ---
+        const symbolMap = {
+    "EURUSDT": "BINANCE:EURUSDT",
+    "XAUUSDT": "BINANCE:XAUUSDT",
+    "XAGUSDT": "BINANCE:XAGUSDT",
+    "ETHUSDT": "BINANCE:ETHUSDT",
+    "BTCUSDT": "BINANCE:BTCUSDT"
+>>>>>>> fd81dee67ea591837a38a09f39726a7629bf5b6e
 };
 
 const intervalMap = {
