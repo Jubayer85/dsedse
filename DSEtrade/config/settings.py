@@ -101,3 +101,7 @@ LOGOUT_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# TwelveData API Configuration
+TWELVEDATA_API_KEY = "59b64fd742aa4662b5c94ff01376d850"  # আপনার API কী

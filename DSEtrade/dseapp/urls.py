@@ -1,5 +1,6 @@
 from django.urls import path
 from dseapp.api import CurrentSignalView
+from .views.tv_views import TVSymbolInfoView, TVHistoryView  
 
 #from dseapp.api import current_signal 
 from . import views
@@ -23,6 +24,8 @@ urlpatterns = [
     path('analysis/', views.analysis, name='analysis'), 
      #path("api/signal/", current_signal), 
     path("api/signal/", CurrentSignalView.as_view(), name="current-signal"),
+    path('api/tv/symbol-info/', TVSymbolInfoView.as_view(), name='tv-symbol-info'),
+    path('api/tv/history/', TVHistoryView.as_view(), name='tv-history'),
     
 
 
