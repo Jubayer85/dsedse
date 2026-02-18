@@ -169,9 +169,6 @@ class Order(models.Model):
         return f"{self.instrument} | Qty: {self.quantity} | Cost: {self.cost_price} | Market: {self.market_price}"
     
 
-
-
-    
 class Candle(models.Model):
     symbol = models.CharField(max_length=20)
     timeframe = models.CharField(max_length=10)
@@ -185,3 +182,5 @@ class Candle(models.Model):
     def __str__(self):
         return f"{self.symbol} {self.timeframe} {self.time}"
 
+    class Meta:
+        unique_together = ("symbol", "timeframe", "time")
