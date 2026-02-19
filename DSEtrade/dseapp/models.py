@@ -178,6 +178,7 @@ class Candle(models.Model):
     high = models.FloatField()
     low = models.FloatField()
     close = models.FloatField()
+    volume = models.FloatField(default=0)
 
     def __str__(self):
         return f"{self.symbol} {self.timeframe} {self.time}"
