@@ -1,619 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMC Pro Trading Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMC Pro Trading Dashboard</title>
 
-    <style>
-        :root {
-            --bg-light: #f8fafc;
-            --card-bg: #ffffff;
-            --accent-blue: #2563eb;
-            --success-green: #10b981;
-            --danger-red: #ef4444;
-            --text-main: #1e293b;
-            --text-dim: #64748b;
-            --border: #e2e8f0;
-        }
+<style>
+:root {
+    --bg-light: #f8fafc;
+    --card-bg: #ffffff;
+    --accent-blue: #2563eb;
+    --success-green: #10b981;
+    --danger-red: #ef4444;
+    --text-main: #1e293b;
+    --text-dim: #64748b;
+    --border: #e2e8f0;
+}
 
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg-light);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-        /* Header & Navigation */
-        .top-bar {
-            width: 100%;
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-            background: #ffffff;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
+.top-bar {
+    width: 100%;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-bottom: 1px solid var(--border);
+}
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 800;
-            font-size: 1.2rem;
-            color: var(--text-main);
-        }
+.selector-box {
+    display: flex;
+    gap: 20px;
+}
 
-        .status-dot {
-            height: 8px;
-            width: 8px;
-            background-color: var(--success-green);
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px var(--success-green);
-            animation: pulse 2s infinite;
-        }
+select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
+.signal-box {
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px 0;
+    padding: 18px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 600;
+    border: 1px solid var(--border);
+}
 
-        /* Selectors */
-        .selector-box {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
+.main-container {
+    width: 95%;
+    max-width: 1400px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+}
 
-        .input-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
 
-        label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-dim);
-        }
+.value {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
 
-        select {
-            background: #ffffff;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 6px 12px;
-            border-radius: 6px;
-            outline: none;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
+.chart-container {
+    background: white;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
 
-        select:hover {
-            border-color: var(--accent-blue);
-            background: #f1f5f9;
-        }
-
-        /* Signal Output */
-        .signal-box {
-            width: 90%;
-            max-width: 1200px;
-            margin: 20px 0;
-            padding: 18px;
-            border-radius: 12px;
-            font-weight: 700;
-            text-align: center;
-            font-size: 20px;
-            transition: all 0.4s ease;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Dashboard Grid */
-        .main-container {
-            width: 95%;
-            max-width: 1400px;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .side-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .card h4 {
-            margin: 0 0 8px 0;
-            color: var(--text-dim);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .card .value {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        /* Chart Area */
-        .chart-container {
-            background: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-
-        .chart-header {
-            padding: 12px 20px;
-            background: #ffffff;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chart-box {
-            width: 100%;
-            height: 600px;
-        }
-
-        /* Price Update Indicator */
-        .price-updated {
-            animation: flash 0.5s ease;
-        }
-
-        @keyframes flash {
-            0% { background-color: rgba(37, 99, 235, 0.2); }
-            100% { background-color: transparent; }
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 900px) {
-            .main-container {
-                grid-template-columns: 1fr;
-            }
-            .top-bar {
-                flex-direction: column;
-                height: auto;
-                padding: 15px;
-                gap: 15px;
-            }
-        }
-
-        .last-update {
-            font-size: 11px;
-            color: var(--text-dim);
-            margin-top: 5px;
-            text-align: right;
-        }
-
-        .error-message {
-            color: var(--danger-red);
-            font-size: 14px;
-            margin-top: 5px;
-        }
-    </style>
+.chart-box {
+    width: 100%;
+    height: 600px;
+}
+</style>
 </head>
 
 <body>
 
 <div class="top-bar">
-    <div class="logo">
-        <span class="status-dot"></span>
-        SMC LIVE <span style="font-weight: 300; color: var(--text-dim);">DASHBOARD</span>
-    </div>
-    
+    <div><strong>SMC LIVE DASHBOARD</strong></div>
     <div class="selector-box">
-        <div class="input-group">
-            <label>ASSET</label>
-            <select id="symbol_select" onchange="updateDashboard()">
-                <option value="EURUSD">EURUSD</option>
-                <option value="XAUUSD">XAUUSD</option>
-                <option value="XAGUSD">XAGUSD</option>
-                <option value="BTCUSD">BTCUSD</option>
-            </select>
-        </div>
+        <select id="symbol_select">
+            <option value="EURUSD">EURUSD</option>
+            <option value="XAUUSD">XAUUSD</option>
+            <option value="XAGUSD">XAGUSD</option>
+            <option value="BTCUSD">BTCUSD</option>
+        </select>
 
-        <div class="input-group">
-            <label>TIMEFRAME</label>
-            <select id="tf_select" onchange="updateDashboard()">
-                <option value="M1">1m</option>
-                <option value="M5">5m</option>
-                <option value="M15" selected>15m</option>
-                <option value="M30">30m</option>
-                <option value="H1">1H</option>
-                <option value="H4">4H</option>
-                <option value="D1">1D</option>
-            </select>
-        </div>
+        <select id="tf_select">
+            <option value="M1">1m</option>
+            <option value="M5">5m</option>
+            <option value="M15" selected>15m</option>
+            <option value="M30">30m</option>
+            <option value="H1">1H</option>
+            <option value="H4">4H</option>
+            <option value="D1">1D</option>
+        </select>
     </div>
 </div>
 
 <div id="signal_output" class="signal-box">
-    ⚡ INITIALIZING DATA STREAM...
+    Loading market data...
 </div>
 
 <div class="main-container">
-    <div class="side-panel">
+
+    <div>
         <div class="card">
-            <h4>Live Price <span style="font-weight: normal; margin-left: 8px; font-size: 10px; color: var(--accent-blue);" id="priceChangeIndicator"></span></h4>
-            <div id="live_price" class="value" style="color: var(--accent-blue);">--</div>
-            <div class="last-update" id="priceTimestamp"></div>
+            <div>Live Price</div>
+            <div id="live_price" class="value">--</div>
         </div>
 
         <div class="card">
-            <h4>Market Structure</h4>
-            <div id="structure" class="value" style="font-size: 1.2rem;">--</div>
+            <div>Market Structure</div>
+            <div id="structure" class="value" style="font-size:1.2rem">--</div>
         </div>
 
         <div class="card">
-            <h4>Confidence Score</h4>
-            <div id="confidence" class="value" style="color: var(--success-green);">--</div>
-            <div style="height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px;">
-                <div id="confidenceBar" style="height: 100%; background: var(--success-green); border-radius: 2px; width: 0%;"></div>
-            </div>
+            <div>Confidence</div>
+            <div id="confidence" class="value">--</div>
         </div>
-        
-        <div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 10px;">
-            Auto-refresh in <span id="timer">5</span>s
-        </div>
-        <div id="apiStatus" style="font-size: 10px; color: var(--text-dim); text-align: center;"></div>
     </div>
 
     <div class="chart-container">
-        <div class="chart-header">
-            <span id="chart_title" style="font-weight: 600; font-size: 14px; color: var(--text-dim);">Market Analysis</span>
-            <span style="font-size: 12px; color: var(--text-dim);">Powered by TradingView</span>
-        </div>
         <div id="main_chart" class="chart-box"></div>
     </div>
+
 </div>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <script>
-let tvWidget = null;
-let timeLeft = 5;
-let previousPrice = null;
-let lastPrices = {};
-let apiBaseUrl = 'http://127.0.0.1:8000'; // আপনার Django সার্ভারের URL
+
+const apiBaseUrl = "http://127.0.0.1:8000";
 
 const symbolMap = {
-    "EURUSD": "FX:EURUSD",
-    "XAUUSD": "OANDA:XAUUSD",
-    "XAGUSD": "OANDA:XAGUSD",
-    "BTCUSD": "COINBASE:BTCUSD"
+    EURUSD: "FX:EURUSD",
+    XAUUSD: "OANDA:XAUUSD",
+    XAGUSD: "OANDA:XAGUSD",
+    BTCUSD: "COINBASE:BTCUSD"
 };
 
 const intervalMap = {
-    "M1": "1",
-    "M5": "5",
-    "M15": "15",
-    "M30": "30",
-    "H1": "60",
-    "H4": "240",
-    "D1": "D"
+    M1: "1",
+    M5: "5",
+    M15: "15",
+    M30: "30",
+    H1: "60",
+    H4: "240",
+    D1: "D"
 };
 
-// ✅ আপডেটেড ফাংশন: প্রথমে Django API থেকে প্রাইস আনার চেষ্টা করবে
+let tvWidget = null;
+
+async function fetchSignal(symbol, tf) {
+    const res = await fetch(`${apiBaseUrl}/api/signal/?symbol=${symbol}&tf=${tf}`);
+    return await res.json();
+}
+
 async function fetchLivePrice(symbol) {
-    try {
-        // প্রথমে Django API কল করে দেখি
-        const signalResponse = await fetch(`${apiBaseUrl}/api/signal/?symbol=${symbol}&tf=M15`);
-        
-        if (signalResponse.ok) {
-            const signalData = await signalResponse.json();
-            if (signalData.price) {
-                console.log(`✅ Got price from Django API: ${signalData.price}`);
-                document.getElementById('apiStatus').innerText = `✓ Price from TwelveData`;
-                return parseFloat(signalData.price);
-            }
-        }
-        
-        // যদি Django API থেকে প্রাইস না পাওয়া যায়, তাহলে পাবলিক API চেষ্টা করবে
-        throw new Error('No price from Django API');
-        
-    } catch (error) {
-        console.log("Django API price failed, trying public API for", symbol);
-        
-        // ফallback হিসেবে পাবলিক API ব্যবহার করুন
-        const apiMap = {
-            "EURUSD": "https://api.exchangerate-api.com/v4/latest/USD",
-            "XAUUSD": "https://api.metals.live/v1/spot/gold",
-            "XAGUSD": "https://api.metals.live/v1/spot/silver",
-            "BTCUSD": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
-        };
-
-        try {
-            let price = null;
-            
-            if (symbol === "EURUSD") {
-                const response = await fetch(apiMap.EURUSD);
-                const data = await response.json();
-                price = data.rates.EUR;
-            } 
-            else if (symbol === "XAUUSD") {
-                const response = await fetch(apiMap.XAUUSD);
-                const data = await response.json();
-                price = data[0]?.price || 1950.50;
-            }
-            else if (symbol === "XAGUSD") {
-                const response = await fetch(apiMap.XAGUSD);
-                const data = await response.json();
-                price = data[0]?.price || 23.45;
-            }
-            else if (symbol === "BTCUSD") {
-                const response = await fetch(apiMap.BTCUSD);
-                const data = await response.json();
-                price = data.bitcoin.usd;
-            }
-            
-            if (price) {
-                document.getElementById('apiStatus').innerText = `✓ Live price from Public API`;
-                return price;
-            } else {
-                throw new Error('No price data');
-            }
-        } catch (e) {
-            console.log("Public API failed, using simulated price");
-            document.getElementById('apiStatus').innerText = `⚠️ Using simulated price`;
-            return getSimulatedPrice(symbol);
-        }
-    }
+    const res = await fetch(`${apiBaseUrl}/api/live-price/?symbol=${symbol}`);
+    return await res.json();
 }
 
-function getSimulatedPrice(symbol) {
-    const basePrices = {
-        "EURUSD": 1.08750,
-        "XAUUSD": 1952.30,
-        "XAGUSD": 23.45,
-        "BTCUSD": 51250.00
-    };
-    
-    let base = basePrices[symbol];
-    
-    // আগের প্রাইস থাকলে সেটা থেকে ভ্যারিয়েশন দিন
-    if (lastPrices[symbol]) {
-        base = lastPrices[symbol];
-    }
-    
-    let variation = (Math.random() - 0.5) * base * 0.0005; // 0.05% variation
-    let newPrice = base + variation;
-    lastPrices[symbol] = newPrice;
-    return newPrice;
-}
+function loadChart(symbol, tf) {
 
-function formatPrice(symbol, price) {
-    if (!price && price !== 0) return '--';
-    
-    if (symbol === "BTCUSD") {
-        return price.toFixed(2);
-    } else if (symbol === "XAUUSD") {
-        return price.toFixed(2);
-    } else if (symbol === "XAGUSD") {
-        return price.toFixed(3);
-    } else {
-        return price.toFixed(5);
-    }
-}
-
-function updatePriceDisplay(symbol, price) {
-    if (!price && price !== 0) return;
-    
-    const priceElement = document.getElementById("live_price");
-    const indicator = document.getElementById("priceChangeIndicator");
-    const timestamp = document.getElementById("priceTimestamp");
-    
-    const formattedPrice = formatPrice(symbol, price);
-    
-    // Show price change indicator
-    if (previousPrice) {
-        if (price > previousPrice) {
-            indicator.innerHTML = "▲";
-            indicator.style.color = "var(--success-green)";
-            priceElement.style.color = "var(--success-green)";
-        } else if (price < previousPrice) {
-            indicator.innerHTML = "▼";
-            indicator.style.color = "var(--danger-red)";
-            priceElement.style.color = "var(--danger-red)";
-        } else {
-            indicator.innerHTML = "−";
-            indicator.style.color = "var(--text-dim)";
-            priceElement.style.color = "var(--accent-blue)";
-        }
-    }
-    
-    priceElement.innerText = formattedPrice;
-    priceElement.classList.add('price-updated');
-    setTimeout(() => priceElement.classList.remove('price-updated'), 500);
-    
-    const now = new Date();
-    timestamp.innerText = `Updated: ${now.toLocaleTimeString()}.${now.getMilliseconds()}`;
-    previousPrice = price;
-}
-
-async function loadSMCSignal(symbol, timeframe) {
-    const box = document.getElementById("signal_output");
-    
-    try {
-        // Django API call with full URL
-        const response = await fetch(`${apiBaseUrl}/api/signal/?symbol=${symbol}&tf=${timeframe}`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log("API Response:", data); // Debug log
-        
-        updateSignalDisplay(data, symbol);
-        document.getElementById('apiStatus').innerText = `✓ Signal from Django API`;
-        
-        // ✅ API থেকে পাওয়া প্রাইস লাইভ প্রাইস কার্ডে দেখাও
-        if (data.price) {
-            updatePriceDisplay(symbol, parseFloat(data.price));
-        }
-        
-    } catch (error) {
-        console.log("Django API not available, using simulated data", error);
-        document.getElementById('apiStatus').innerText = `⚠️ Using simulated signal`;
-        
-        // Simulated SMC logic
-        const signals = ["BUY", "SELL", "NO TRADE"];
-        const structures = ["BOS Forming", "CHoCH Detected", "Liquidity Sweep", "Order Block", "FVG Found"];
-        const confidenceScore = Math.floor(Math.random() * 40) + 60; // 60-100
-        
-        const simulatedData = {
-            signal: signals[Math.floor(Math.random() * signals.length)],
-            structure: structures[Math.floor(Math.random() * structures.length)],
-            confidence: confidenceScore + "%"
-        };
-        
-        updateSignalDisplay(simulatedData, symbol);
-        
-        // যদি API ব্যর্থ হয়, তাহলে পাবলিক API বা সিমুলেটেড প্রাইস ব্যবহার করবে
-        const livePrice = await fetchLivePrice(symbol);
-        updatePriceDisplay(symbol, livePrice);
-    }
-}
-
-function updateSignalDisplay(data, symbol) {
-    const box = document.getElementById("signal_output");
-    
-    if (data.signal === "BUY") {
-        box.style.background = "#ecfdf5";
-        box.style.color = "var(--success-green)";
-        box.style.borderColor = "var(--success-green)";
-        box.innerHTML = `▲ BULLISH MOMENTUM • BUY SIGNAL (${symbol})`;
-    }
-    else if (data.signal === "SELL") {
-        box.style.background = "#fef2f2";
-        box.style.color = "var(--danger-red)";
-        box.style.borderColor = "var(--danger-red)";
-        box.innerHTML = `▼ BEARISH PRESSURE • SELL SIGNAL (${symbol})`;
-    }
-    else {
-        box.style.background = "#f8fafc";
-        box.style.color = "#64748b";
-        box.style.borderColor = "#e2e8f0";
-        box.innerHTML = `⏳ CONSOLIDATION • NO CLEAR SIGNAL (${symbol})`;
-    }
-
-    document.getElementById("structure").innerText = data.structure || "Analyzing...";
-    
-    let confidenceValue = 50;
-    if (data.confidence) {
-        if (typeof data.confidence === 'string' && data.confidence.includes('%')) {
-            confidenceValue = parseInt(data.confidence);
-        } else {
-            confidenceValue = parseInt(data.confidence) || 50;
-        }
-    }
-    
-    document.getElementById("confidence").innerText = confidenceValue + "%";
-    document.getElementById("confidenceBar").style.width = confidenceValue + "%";
-}
-
-function loadChart(symbol, timeframe) {
-    const chartContainer = document.getElementById("main_chart");
-    
     if (tvWidget) {
-        try {
-            tvWidget.remove();
-        } catch (e) {}
-        chartContainer.innerHTML = "";
+        tvWidget.remove();
+        document.getElementById("main_chart").innerHTML = "";
     }
 
     tvWidget = new TradingView.widget({
         width: "100%",
         height: "100%",
         symbol: symbolMap[symbol],
-        interval: intervalMap[timeframe],
+        interval: intervalMap[tf],
         timezone: "Asia/Dhaka",
         theme: "light",
-        style: "1",
-        locale: "en",
-        toolbar_bg: "#ffffff",
-        enable_publishing: false,
-        hide_side_toolbar: false,
         container_id: "main_chart",
-        studies: [
-            "MACD@tv-basicstudies",
-            "RSI@tv-basicstudies"
-        ]
+        studies: ["MACD@tv-basicstudies","RSI@tv-basicstudies"]
+    });
+}
+
+function updateSignalUI(data, symbol) {
+
+    const box = document.getElementById("signal_output");
+
+    if (data.signal === "BUY") {
+        box.style.background = "#ecfdf5";
+        box.style.color = "#10b981";
+        box.innerText = `BUY SIGNAL (${symbol})`;
+    }
+    else if (data.signal === "SELL") {
+        box.style.background = "#fef2f2";
+        box.style.color = "#ef4444";
+        box.innerText = `SELL SIGNAL (${symbol})`;
+    }
+    else {
+        box.style.background = "#f1f5f9";
+        box.style.color = "#64748b";
+        box.innerText = `NO CLEAR SIGNAL (${symbol})`;
+    }
+
+    document.getElementById("structure").innerText = data.structure || "--";
+    document.getElementById("confidence").innerText = (data.confidence || 50) + "%";
+}
+
+function updatePriceUI(symbol, price) {
+
+    if (!price) return;
+
+    let formatted;
+
+    if (symbol === "BTCUSD") formatted = price.toFixed(2);
+    else if (symbol === "XAGUSD") formatted = price.toFixed(3);
+    else if (symbol === "XAUUSD") formatted = price.toFixed(2);
+    else formatted = price.toFixed(5);
+
+    document.getElementById("live_price").innerText = formatted;
+}
+
+async function refreshDashboard() {
+
+    const symbol = document.getElementById("symbol_select").value;
+    const tf = document.getElementById("tf_select").value;
+
+    try {
+
+        const signalData = await fetchSignal(symbol, tf);
+        updateSignalUI(signalData, symbol);
+
+        const priceData = await fetchLivePrice(symbol);
+        if (priceData.price)
+            updatePriceUI(symbol, parseFloat(priceData.price));
+
+    } catch (err) {
+        console.error("API error:", err);
+    }
+}
+
+function init() {
+
+    const symbol = document.getElementById("symbol_select").value;
+    const tf = document.getElementById("tf_select").value;
+
+    loadChart(symbol, tf);
+    refreshDashboard();
+
+    document.getElementById("symbol_select").addEventListener("change", () => {
+        loadChart(symbol_select.value, tf_select.value);
+        refreshDashboard();
     });
 
-    document.getElementById("chart_title").innerText = `${symbol} • ${timeframe} • Smart Money Concepts`;
+    document.getElementById("tf_select").addEventListener("change", () => {
+        loadChart(symbol_select.value, tf_select.value);
+        refreshDashboard();
+    });
+
+    setInterval(refreshDashboard, 5000);
 }
 
-function updateDashboard() {
-    const symbol = document.getElementById("symbol_select").value;
-    const timeframe = document.getElementById("tf_select").value;
-    
-    // Reset timer
-    timeLeft = 5;
-    document.getElementById("timer").innerText = timeLeft;
-    
-    // Update chart and signals
-    loadChart(symbol, timeframe);
-    loadSMCSignal(symbol, timeframe);
-}
-
-// Timer countdown
-setInterval(() => {
-    timeLeft--;
-    if(timeLeft <= 0) {
-        const symbol = document.getElementById("symbol_select").value;
-        const timeframe = document.getElementById("tf_select").value;
-        loadSMCSignal(symbol, timeframe);
-        timeLeft = 5;
-    }
-    document.getElementById("timer").innerText = timeLeft;
-}, 1000);
-
-// Initial load
-updateDashboard();
-
-// Additional price update every 2 seconds for smoother updates (ফallback হিসেবে কাজ করবে)
-setInterval(async () => {
-    const symbol = document.getElementById("symbol_select").value;
-    
-    // শুধু মাত্র যদি লাইভ প্রাইস আপডেট না হয়, তাহলে এই ইন্টারভাল কাজ করবে
-    // তবে এখন আমরা loadSMCSignal-ই প্রাইস আপডেট করছে, তাই এটি মূলত ব্যাকআপ হিসেবে থাকলো
-    const priceElement = document.getElementById("live_price");
-    if (priceElement.innerText === '--') {
-        const livePrice = await fetchLivePrice(symbol);
-        updatePriceDisplay(symbol, livePrice);
-    }
-}, 2000);
+init();
 
 </script>
-
 </body>
 </html>
