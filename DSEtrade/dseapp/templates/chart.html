@@ -212,6 +212,12 @@
             margin-top: 5px;
             text-align: right;
         }
+
+        .error-message {
+            color: var(--danger-red);
+            font-size: 14px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 
@@ -277,6 +283,7 @@
         <div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 10px;">
             Auto-refresh in <span id="timer">5</span>s
         </div>
+        <div id="apiStatus" style="font-size: 10px; color: var(--text-dim); text-align: center;"></div>
     </div>
 
     <div class="chart-container">
@@ -295,6 +302,7 @@ let tvWidget = null;
 let timeLeft = 5;
 let previousPrice = null;
 let lastPrices = {};
+let apiBaseUrl = 'http://127.0.0.1:8000'; // আপনার Django সার্ভারের URL
 
 const symbolMap = {
     "EURUSD": "FX:EURUSD",
@@ -313,43 +321,70 @@ const intervalMap = {
     "D1": "D"
 };
 
-// Public API endpoints for live prices (CORS-friendly)
+// ✅ আপডেটেড ফাংশন: প্রথমে Django API থেকে প্রাইস আনার চেষ্টা করবে
 async function fetchLivePrice(symbol) {
-    const apiMap = {
-        "EURUSD": "https://api.exchangerate-api.com/v4/latest/USD",
-        "XAUUSD": "https://api.metals.live/v1/spot/gold",
-        "XAGUSD": "https://api.metals.live/v1/spot/silver",
-        "BTCUSD": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
-    };
-
     try {
-        let price = null;
+        // প্রথমে Django API কল করে দেখি
+        const signalResponse = await fetch(`${apiBaseUrl}/api/signal/?symbol=${symbol}&tf=M15`);
         
-        if (symbol === "EURUSD") {
-            const response = await fetch(apiMap.EURUSD);
-            const data = await response.json();
-            price = data.rates.EUR;
-        } 
-        else if (symbol === "XAUUSD") {
-            const response = await fetch(apiMap.XAUUSD);
-            const data = await response.json();
-            price = data[0]?.price || 1950.50;
-        }
-        else if (symbol === "XAGUSD") {
-            const response = await fetch(apiMap.XAGUSD);
-            const data = await response.json();
-            price = data[1]?.price || 23.20;
-        }
-        else if (symbol === "BTCUSD") {
-            const response = await fetch(apiMap.BTCUSD);
-            const data = await response.json();
-            price = data.bitcoin.usd;
+        if (signalResponse.ok) {
+            const signalData = await signalResponse.json();
+            if (signalData.price) {
+                console.log(`✅ Got price from Django API: ${signalData.price}`);
+                document.getElementById('apiStatus').innerText = `✓ Price from TwelveData`;
+                return parseFloat(signalData.price);
+            }
         }
         
-        return price;
+        // যদি Django API থেকে প্রাইস না পাওয়া যায়, তাহলে পাবলিক API চেষ্টা করবে
+        throw new Error('No price from Django API');
+        
     } catch (error) {
-        console.log("Using simulated price for", symbol);
-        return getSimulatedPrice(symbol);
+        console.log("Django API price failed, trying public API for", symbol);
+        
+        // ফallback হিসেবে পাবলিক API ব্যবহার করুন
+        const apiMap = {
+            "EURUSD": "https://api.exchangerate-api.com/v4/latest/USD",
+            "XAUUSD": "https://api.metals.live/v1/spot/gold",
+            "XAGUSD": "https://api.metals.live/v1/spot/silver",
+            "BTCUSD": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+        };
+
+        try {
+            let price = null;
+            
+            if (symbol === "EURUSD") {
+                const response = await fetch(apiMap.EURUSD);
+                const data = await response.json();
+                price = data.rates.EUR;
+            } 
+            else if (symbol === "XAUUSD") {
+                const response = await fetch(apiMap.XAUUSD);
+                const data = await response.json();
+                price = data[0]?.price || 1950.50;
+            }
+            else if (symbol === "XAGUSD") {
+                const response = await fetch(apiMap.XAGUSD);
+                const data = await response.json();
+                price = data[0]?.price || 23.45;
+            }
+            else if (symbol === "BTCUSD") {
+                const response = await fetch(apiMap.BTCUSD);
+                const data = await response.json();
+                price = data.bitcoin.usd;
+            }
+            
+            if (price) {
+                document.getElementById('apiStatus').innerText = `✓ Live price from Public API`;
+                return price;
+            } else {
+                throw new Error('No price data');
+            }
+        } catch (e) {
+            console.log("Public API failed, using simulated price");
+            document.getElementById('apiStatus').innerText = `⚠️ Using simulated price`;
+            return getSimulatedPrice(symbol);
+        }
     }
 }
 
@@ -358,15 +393,25 @@ function getSimulatedPrice(symbol) {
         "EURUSD": 1.08750,
         "XAUUSD": 1952.30,
         "XAGUSD": 23.45,
-        "BTCUSD": loding
+        "BTCUSD": 51250.00
     };
     
     let base = basePrices[symbol];
-    let variation = (Math.random() - 0.5) * base * 0.002; // 0.2% variation
-    return base + variation;
+    
+    // আগের প্রাইস থাকলে সেটা থেকে ভ্যারিয়েশন দিন
+    if (lastPrices[symbol]) {
+        base = lastPrices[symbol];
+    }
+    
+    let variation = (Math.random() - 0.5) * base * 0.0005; // 0.05% variation
+    let newPrice = base + variation;
+    lastPrices[symbol] = newPrice;
+    return newPrice;
 }
 
 function formatPrice(symbol, price) {
+    if (!price && price !== 0) return '--';
+    
     if (symbol === "BTCUSD") {
         return price.toFixed(2);
     } else if (symbol === "XAUUSD") {
@@ -379,6 +424,8 @@ function formatPrice(symbol, price) {
 }
 
 function updatePriceDisplay(symbol, price) {
+    if (!price && price !== 0) return;
+    
     const priceElement = document.getElementById("live_price");
     const indicator = document.getElementById("priceChangeIndicator");
     const timestamp = document.getElementById("priceTimestamp");
@@ -396,7 +443,8 @@ function updatePriceDisplay(symbol, price) {
             indicator.style.color = "var(--danger-red)";
             priceElement.style.color = "var(--danger-red)";
         } else {
-            indicator.innerHTML = "";
+            indicator.innerHTML = "−";
+            indicator.style.color = "var(--text-dim)";
             priceElement.style.color = "var(--accent-blue)";
         }
     }
@@ -405,7 +453,8 @@ function updatePriceDisplay(symbol, price) {
     priceElement.classList.add('price-updated');
     setTimeout(() => priceElement.classList.remove('price-updated'), 500);
     
-    timestamp.innerText = `Updated: ${new Date().toLocaleTimeString()}`;
+    const now = new Date();
+    timestamp.innerText = `Updated: ${now.toLocaleTimeString()}.${now.getMilliseconds()}`;
     previousPrice = price;
 }
 
@@ -413,14 +462,27 @@ async function loadSMCSignal(symbol, timeframe) {
     const box = document.getElementById("signal_output");
     
     try {
-        // Try Django API first
-        const response = await fetch(`/api/signal/?symbol=${symbol}&tf=${timeframe}`);
+        // Django API call with full URL
+        const response = await fetch(`${apiBaseUrl}/api/signal/?symbol=${symbol}&tf=${timeframe}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log("API Response:", data); // Debug log
         
         updateSignalDisplay(data, symbol);
+        document.getElementById('apiStatus').innerText = `✓ Signal from Django API`;
+        
+        // ✅ API থেকে পাওয়া প্রাইস লাইভ প্রাইস কার্ডে দেখাও
+        if (data.price) {
+            updatePriceDisplay(symbol, parseFloat(data.price));
+        }
         
     } catch (error) {
-        console.log("Django API not available, using simulated data");
+        console.log("Django API not available, using simulated data", error);
+        document.getElementById('apiStatus').innerText = `⚠️ Using simulated signal`;
         
         // Simulated SMC logic
         const signals = ["BUY", "SELL", "NO TRADE"];
@@ -434,11 +496,11 @@ async function loadSMCSignal(symbol, timeframe) {
         };
         
         updateSignalDisplay(simulatedData, symbol);
+        
+        // যদি API ব্যর্থ হয়, তাহলে পাবলিক API বা সিমুলেটেড প্রাইস ব্যবহার করবে
+        const livePrice = await fetchLivePrice(symbol);
+        updatePriceDisplay(symbol, livePrice);
     }
-    
-    // Always fetch live price separately
-    const livePrice = await fetchLivePrice(symbol);
-    updatePriceDisplay(symbol, livePrice);
 }
 
 function updateSignalDisplay(data, symbol) {
@@ -465,7 +527,15 @@ function updateSignalDisplay(data, symbol) {
 
     document.getElementById("structure").innerText = data.structure || "Analyzing...";
     
-    const confidenceValue = data.confidence ? parseInt(data.confidence) : 75;
+    let confidenceValue = 50;
+    if (data.confidence) {
+        if (typeof data.confidence === 'string' && data.confidence.includes('%')) {
+            confidenceValue = parseInt(data.confidence);
+        } else {
+            confidenceValue = parseInt(data.confidence) || 50;
+        }
+    }
+    
     document.getElementById("confidence").innerText = confidenceValue + "%";
     document.getElementById("confidenceBar").style.width = confidenceValue + "%";
 }
@@ -530,12 +600,18 @@ setInterval(() => {
 // Initial load
 updateDashboard();
 
-// Additional price update every 3 seconds for smoother updates
+// Additional price update every 2 seconds for smoother updates (ফallback হিসেবে কাজ করবে)
 setInterval(async () => {
     const symbol = document.getElementById("symbol_select").value;
-    const livePrice = await fetchLivePrice(symbol);
-    updatePriceDisplay(symbol, livePrice);
-}, 3000);
+    
+    // শুধু মাত্র যদি লাইভ প্রাইস আপডেট না হয়, তাহলে এই ইন্টারভাল কাজ করবে
+    // তবে এখন আমরা loadSMCSignal-ই প্রাইস আপডেট করছে, তাই এটি মূলত ব্যাকআপ হিসেবে থাকলো
+    const priceElement = document.getElementById("live_price");
+    if (priceElement.innerText === '--') {
+        const livePrice = await fetchLivePrice(symbol);
+        updatePriceDisplay(symbol, livePrice);
+    }
+}, 2000);
 
 </script>
 
