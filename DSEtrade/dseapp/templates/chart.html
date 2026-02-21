@@ -1,97 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMC Pro Trading Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMC Pro Trading Dashboard</title>
 
-<style>
-:root {
-    --bg-light: #f8fafc;
-    --card-bg: #ffffff;
-    --accent-blue: #2563eb;
-    --success-green: #10b981;
-    --danger-red: #ef4444;
-    --text-main: #1e293b;
-    --text-dim: #64748b;
-    --border: #e2e8f0;
-}
-
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: var(--bg-light);
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.top-bar {
-    width: 100%;
-    padding: 15px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: white;
-    border-bottom: 1px solid var(--border);
-}
-
-.selector-box {
-    display: flex;
-    gap: 20px;
-}
-
-select {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-}
-
-.signal-box {
-    width: 90%;
-    max-width: 1200px;
-    margin: 20px 0;
-    padding: 18px;
-    border-radius: 10px;
-    text-align: center;
-    font-weight: 600;
-    border: 1px solid var(--border);
-}
-
-.main-container {
-    width: 95%;
-    max-width: 1400px;
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 20px;
-}
-
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-}
-
-.value {
-    font-size: 1.6rem;
-    font-weight: 700;
-}
-
-.chart-container {
-    background: white;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    overflow: hidden;
-}
-
-<<<<<<< HEAD
-        select:hover {
-            border-color: var(--accent-blue);
-            background: #f1f5f9;
+    <style>
+        :root {
+            --bg-light: #f8fafc;
+            --card-bg: #ffffff;
+            --accent-blue: #2563eb;
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+            --text-main: #e1e7f0;
+            --text-dim: #94a3b8;
+            --border: #334155;
         }
 
-        /* Signal Output */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .top-bar {
+            width: 100%;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            background: #1e293b;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .selector-box {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        select {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        select:hover {
+            border-color: #60a5fa;
+            background: #1e293b;
+        }
+
         .signal-box {
             width: 90%;
             max-width: 1200px;
@@ -103,10 +114,10 @@ select {
             font-size: 20px;
             transition: all 0.4s ease;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            background: #1e293b;
         }
 
-        /* Dashboard Grid */
         .main-container {
             width: 95%;
             max-width: 1400px;
@@ -123,11 +134,11 @@ select {
         }
 
         .card {
-            background: var(--card-bg);
+            background: #1e293b;
             padding: 20px;
             border-radius: 12px;
             border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
         .card h4 {
@@ -139,25 +150,24 @@ select {
         }
 
         .card .value {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            color: var(--text-main);
+            color: #f0f4fa;
         }
 
-        /* Chart Area */
         .chart-container {
-            background: var(--card-bg);
+            background: #1e293b;
             border-radius: 12px;
             border: 1px solid var(--border);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
         .chart-header {
             padding: 12px 20px;
-            background: #ffffff;
+            background: #0f172a;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
@@ -169,17 +179,15 @@ select {
             height: 600px;
         }
 
-        /* Price Update Indicator */
         .price-updated {
             animation: flash 0.5s ease;
         }
 
         @keyframes flash {
-            0% { background-color: rgba(37, 99, 235, 0.2); }
-            100% { background-color: transparent; }
+            0% { color: #60a5fa; }
+            100% { color: #f0f4fa; }
         }
 
-        /* Mobile Responsive */
         @media (max-width: 900px) {
             .main-container {
                 grid-template-columns: 1fr;
@@ -199,196 +207,251 @@ select {
             text-align: right;
         }
 
-        .error-message {
-            color: var(--danger-red);
-            font-size: 14px;
-            margin-top: 5px;
+        #apiStatus {
+            font-size: 10px;
+            color: #60a5fa;
+            text-align: center;
+            padding: 5px;
         }
     </style>
-=======
-.chart-box {
-    width: 100%;
-    height: 600px;
-}
-</style>
->>>>>>> 173a5a0fb3e8eca40fa6c4b62e9003496dea3f82
 </head>
 
 <body>
 
 <div class="top-bar">
-    <div><strong>SMC LIVE DASHBOARD</strong></div>
+    <div class="logo">
+        <span class="status-dot"></span>
+        SMC LIVE <span style="font-weight: 300; color: var(--text-dim);">DASHBOARD</span>
+    </div>
+    
     <div class="selector-box">
-        <select id="symbol_select">
-            <option value="EURUSD">EURUSD</option>
-            <option value="XAUUSD">XAUUSD</option>
-            <option value="XAGUSD">XAGUSD</option>
-            <option value="BTCUSD">BTCUSD</option>
-        </select>
+        <div class="input-group">
+            <label>ASSET</label>
+            <select id="symbol_select" onchange="handleSymbolChange()">
+                <option value="EURUSD">EURUSD</option>
+                <option value="XAUUSD">XAUUSD</option>
+                <option value="XAGUSD">XAGUSD</option>
+                <option value="BTCUSD">BTCUSD</option>
+            </select>
+        </div>
 
-        <select id="tf_select">
-            <option value="M1">1m</option>
-            <option value="M5">5m</option>
-            <option value="M15" selected>15m</option>
-            <option value="M30">30m</option>
-            <option value="H1">1H</option>
-            <option value="H4">4H</option>
-            <option value="D1">1D</option>
-        </select>
+        <div class="input-group">
+            <label>TIMEFRAME</label>
+            <select id="tf_select" onchange="handleTimeframeChange()">
+                <option value="M1">1m</option>
+                <option value="M5">5m</option>
+                <option value="M15" selected>15m</option>
+                <option value="M30">30m</option>
+                <option value="H1">1H</option>
+                <option value="H4">4H</option>
+                <option value="D1">1D</option>
+            </select>
+        </div>
     </div>
 </div>
 
 <div id="signal_output" class="signal-box">
-    Loading market data...
+    ⚡ INITIALIZING DATA STREAM...
 </div>
 
 <div class="main-container">
-
-    <div>
+    <div class="side-panel">
         <div class="card">
-            <div>Live Price</div>
+            <h4>Live Price <span style="font-weight: normal; margin-left: 8px; font-size: 10px;" id="priceChangeIndicator"></span></h4>
             <div id="live_price" class="value">--</div>
+            <div class="last-update" id="priceTimestamp"></div>
         </div>
 
         <div class="card">
-            <div>Market Structure</div>
-            <div id="structure" class="value" style="font-size:1.2rem">--</div>
+            <h4>Market Structure</h4>
+            <div id="structure" class="value" style="font-size: 1.2rem;">--</div>
         </div>
 
         <div class="card">
-            <div>Confidence</div>
-            <div id="confidence" class="value">--</div>
+            <h4>Confidence Score</h4>
+            <div id="confidence" class="value" style="color: #4ade80;">--</div>
+            <div style="height: 4px; background: #334155; border-radius: 2px; margin-top: 10px;">
+                <div id="confidenceBar" style="height: 100%; background: #4ade80; border-radius: 2px; width: 0%;"></div>
+            </div>
         </div>
-        <div id="apiStatus" style="font-size: 10px; color: var(--text-dim); text-align: center;"></div>
+        
+        <div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 10px;">
+            Auto-refresh in <span id="timer">5</span>s
+        </div>
+        <div id="apiStatus"></div>
     </div>
 
     <div class="chart-container">
+        <div class="chart-header">
+            <span id="chart_title" style="font-weight: 600; font-size: 14px; color: var(--text-dim);">Market Analysis</span>
+            <span style="font-size: 12px; color: var(--text-dim);">Powered by TradingView</span>
+        </div>
         <div id="main_chart" class="chart-box"></div>
     </div>
-
 </div>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <script>
-<<<<<<< HEAD
+// ==================== CONFIGURATION ====================
+const API_BASE_URL = 'http://127.0.0.1:8000';
+const TWELVE_DATA_API_KEY = "59b64fd742aa4662b5c94ff01376d850";
+
+// ==================== STATE MANAGEMENT ====================
 let tvWidget = null;
 let timeLeft = 5;
 let previousPrice = null;
 let lastPrices = {};
-let apiBaseUrl = 'http://127.0.0.1:8000'; // আপনার Django সার্ভারের URL
-=======
+let lastSignalData = {};
 
-const apiBaseUrl = "http://127.0.0.1:8000";
->>>>>>> 173a5a0fb3e8eca40fa6c4b62e9003496dea3f82
+// API Call Tracking (Rate Limiting)
+let lastTwelveDataCall = {};
+let lastSignalCall = {};
+let cachedTwelveDataPrice = {};
 
+// Symbol Maps
 const symbolMap = {
-    EURUSD: "FX:EURUSD",
-    XAUUSD: "OANDA:XAUUSD",
-    XAGUSD: "OANDA:XAGUSD",
-    BTCUSD: "COINBASE:BTCUSD"
+    "EURUSD": "FX:EURUSD",
+    "XAUUSD": "OANDA:XAUUSD",
+    "XAGUSD": "OANDA:XAGUSD",
+    "BTCUSD": "COINBASE:BTCUSD"
 };
 
 const intervalMap = {
-    M1: "1",
-    M5: "5",
-    M15: "15",
-    M30: "30",
-    H1: "60",
-    H4: "240",
-    D1: "D"
+    "M1": "1", "M5": "5", "M15": "15", "M30": "30",
+    "H1": "60", "H4": "240", "D1": "D"
 };
 
-<<<<<<< HEAD
-// ============================================
-// শুধুমাত্র TwelveData API ব্যবহার করা হচ্ছে
-// ============================================
+// ==================== API FUNCTIONS (RATE LIMITED) ====================
 
-// TwelveData API থেকে সরাসরি প্রাইস আনার ফাংশন
+/**
+ * TwelveData API - প্রতি ৩০ সেকেন্ডে একবার কল হবে
+ */
 async function fetchTwelveDataPrice(symbol) {
+    const now = Date.now();
+    const THIRTY_SECONDS = 30000;
+    
+    // ক্যাশে চেক করুন (৩০ সেকেন্ডের মধ্যে কল করা হলে ক্যাশ দেখাবে)
+    if (lastTwelveDataCall[symbol] && (now - lastTwelveDataCall[symbol] < THIRTY_SECONDS)) {
+        console.log(`🔄 Using cached TwelveData price for ${symbol}`);
+        updateApiStatus(`Cached (${Math.round((now - lastTwelveDataCall[symbol])/1000)}s old)`);
+        return cachedTwelveDataPrice[symbol];
+    }
+    
     try {
-        // TwelveData API key (আপনার API key ব্যবহার করুন)
-        const apiKey = "59b64fd742aa4662b5c94ff01376d850";
+        // Symbol Formatting
+        const formattedSymbol = {
+            "EURUSD": "EUR/USD",
+            "XAUUSD": "XAU/USD",
+            "XAGUSD": "XAG/USD",
+            "BTCUSD": "BTC/USD"
+        }[symbol] || symbol;
         
-        // সিম্বল ফরম্যাট ঠিক করা
-        let formattedSymbol = symbol;
-        if (symbol === "EURUSD") formattedSymbol = "EUR/USD";
-        else if (symbol === "XAUUSD") formattedSymbol = "XAU/USD";
-        else if (symbol === "XAGUSD") formattedSymbol = "XAG/USD";
-        else if (symbol === "BTCUSD") formattedSymbol = "BTC/USD";
+        const url = `https://api.twelvedata.com/price?symbol=${formattedSymbol}&apikey=${TWELVE_DATA_API_KEY}`;
         
-        // TwelveData API URL (শুধু প্রাইসের জন্য)
-        const url = `https://api.twelvedata.com/price?symbol=${formattedSymbol}&apikey=${apiKey}`;
+        console.log(`📡 Fetching TwelveData price for: ${formattedSymbol}`);
+        updateApiStatus('Fetching...');
         
-        console.log(`Fetching TwelveData price for: ${formattedSymbol}`);
         const response = await fetch(url);
         const data = await response.json();
         
         if (data.price) {
-            console.log(`✅ TwelveData price: ${data.price}`);
-            document.getElementById('apiStatus').innerText = `✓ TwelveData API`;
-            return parseFloat(data.price);
+            const price = parseFloat(data.price);
+            
+            // ক্যাশ আপডেট
+            cachedTwelveDataPrice[symbol] = price;
+            lastTwelveDataCall[symbol] = now;
+            
+            updateApiStatus(`✓ TwelveData Live`);
+            return price;
         } else {
-            console.warn("TwelveData response:", data);
             throw new Error('No price in response');
         }
     } catch (error) {
         console.error("TwelveData API error:", error);
-        document.getElementById('apiStatus').innerText = `⚠️ TwelveData Error`;
+        updateApiStatus('⚠️ TwelveData Error');
         
-        // ফ্যালব্যাক হিসেবে Django API থেকে প্রাইস আনার চেষ্টা
-        try {
-            const response = await fetch(`${apiBaseUrl}/api/signal/?symbol=${symbol}&tf=M15`);
-            const data = await response.json();
-            if (data.price) {
-                console.log(`✅ Fallback Django API price: ${data.price}`);
-                return parseFloat(data.price);
-            }
-        } catch (fallbackError) {
-            console.error("Fallback also failed");
+        // Fallback to Django API
+        return fetchDjangoPrice(symbol);
+    }
+}
+
+/**
+ * Django Signal API - প্রতি ৫ সেকেন্ডে একবার কল হবে (সিগন্যালের জন্য)
+ */
+async function fetchSignalData(symbol, timeframe) {
+    const now = Date.now();
+    const FIVE_SECONDS = 5000;
+    const cacheKey = `${symbol}_${timeframe}`;
+    
+    // সিগন্যাল ক্যাশ চেক করুন (৫ সেকেন্ড)
+    if (lastSignalCall[cacheKey] && (now - lastSignalCall[cacheKey] < FIVE_SECONDS)) {
+        console.log(`🔄 Using cached signal for ${symbol} ${timeframe}`);
+        return lastSignalData[cacheKey];
+    }
+    
+    try {
+        const url = `${API_BASE_URL}/api/signal/?symbol=${symbol}&tf=${timeframe}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        
+        // ক্যাশ আপডেট
+        lastSignalData[cacheKey] = data;
+        lastSignalCall[cacheKey] = now;
+        
+        return data;
+        
+    } catch (error) {
+        console.error("Signal API error:", error);
+        return null;
+    }
+}
+
+/**
+ * Django Price API - TwelveData ব্যর্থ হলে Fallback হিসেবে ব্যবহার হবে
+ */
+async function fetchDjangoPrice(symbol) {
+    try {
+        const url = `${API_BASE_URL}/api/signal/?symbol=${symbol}&tf=M15`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.price) {
+            updateApiStatus('✓ Django Fallback');
+            return parseFloat(data.price);
         }
-        
-        // সবকিছু ব্যর্থ হলে সিমুলেটেড প্রাইস
-        return getSimulatedPrice(symbol);
-    }
-}
-
-// সিমুলেটেড প্রাইস (শেষ অবলম্বন)
-function getSimulatedPrice(symbol) {
-    const basePrices = {
-        "EURUSD": 1.08750,
-        "XAUUSD": 1952.30,
-        "XAGUSD": 23.45,
-        "BTCUSD": 51250.00
-    };
-    
-    let base = basePrices[symbol];
-    if (lastPrices[symbol]) {
-        base = lastPrices[symbol];
+    } catch (error) {
+        console.error("Django fallback failed");
     }
     
-    let variation = (Math.random() - 0.5) * base * 0.0005;
-    let newPrice = base + variation;
-    lastPrices[symbol] = newPrice;
-    return newPrice;
+    // সবকিছু ব্যর্থ হলে সিমুলেটেড প্রাইস
+    updateApiStatus('⚠️ Simulated');
+    return getSimulatedPrice(symbol);
 }
 
-// ফরম্যাটিং ফাংশন
+// ==================== UI UPDATE FUNCTIONS ====================
+
+function updateApiStatus(status) {
+    const statusEl = document.getElementById('apiStatus');
+    if (statusEl) statusEl.innerText = status;
+}
+
 function formatPrice(symbol, price) {
     if (!price && price !== 0) return '--';
     
-    if (symbol === "BTCUSD") {
-        return price.toFixed(2);
-    } else if (symbol === "XAUUSD") {
-        return price.toFixed(2);
-    } else if (symbol === "XAGUSD") {
-        return price.toFixed(3);
-    } else {
-        return price.toFixed(5);
-    }
+    const formats = {
+        "BTCUSD": (p) => p.toFixed(2),
+        "XAUUSD": (p) => p.toFixed(2),
+        "XAGUSD": (p) => p.toFixed(3),
+        "default": (p) => p.toFixed(5)
+    };
+    
+    return (formats[symbol] || formats.default)(price);
 }
 
-// প্রাইস ডিসপ্লে আপডেট
 function updatePriceDisplay(symbol, price) {
     if (!price && price !== 0) return;
     
@@ -401,16 +464,13 @@ function updatePriceDisplay(symbol, price) {
     if (previousPrice) {
         if (price > previousPrice) {
             indicator.innerHTML = "▲";
-            indicator.style.color = "var(--success-green)";
-            priceElement.style.color = "var(--success-green)";
+            indicator.style.color = "#4ade80";
         } else if (price < previousPrice) {
             indicator.innerHTML = "▼";
-            indicator.style.color = "var(--danger-red)";
-            priceElement.style.color = "var(--danger-red)";
+            indicator.style.color = "#f87171";
         } else {
             indicator.innerHTML = "−";
-            indicator.style.color = "var(--text-dim)";
-            priceElement.style.color = "var(--accent-blue)";
+            indicator.style.color = "#94a3b8";
         }
     }
     
@@ -418,92 +478,66 @@ function updatePriceDisplay(symbol, price) {
     priceElement.classList.add('price-updated');
     setTimeout(() => priceElement.classList.remove('price-updated'), 500);
     
-    const now = new Date();
-    timestamp.innerText = `Updated: ${now.toLocaleTimeString()}.${now.getMilliseconds()}`;
+    timestamp.innerText = `Updated: ${new Date().toLocaleTimeString()}.${new Date().getMilliseconds()}`;
     previousPrice = price;
 }
 
-// Django API থেকে সিগন্যাল ডেটা আনা
-async function loadSMCSignal(symbol, timeframe) {
-    try {
-        const response = await fetch(`${apiBaseUrl}/api/signal/?symbol=${symbol}&tf=${timeframe}`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log("Signal API Response:", data);
-        
-        updateSignalDisplay(data, symbol);
-        return data;
-        
-    } catch (error) {
-        console.error("Signal API error:", error);
-        return null;
-    }
-}
-
-// সিগন্যাল ডিসপ্লে আপডেট
 function updateSignalDisplay(data, symbol) {
+    if (!data) return;
+    
     const box = document.getElementById("signal_output");
     
+    // Signal Display
     if (data.signal === "BUY") {
-        box.style.background = "#ecfdf5";
-        box.style.color = "var(--success-green)";
-        box.style.borderColor = "var(--success-green)";
+        box.style.background = "#064e3b";
+        box.style.color = "#4ade80";
+        box.style.borderColor = "#4ade80";
         box.innerHTML = `▲ BULLISH MOMENTUM • BUY SIGNAL (${symbol})`;
-    }
-    else if (data.signal === "SELL") {
-        box.style.background = "#fef2f2";
-        box.style.color = "var(--danger-red)";
-        box.style.borderColor = "var(--danger-red)";
+    } else if (data.signal === "SELL") {
+        box.style.background = "#7f1d1d";
+        box.style.color = "#f87171";
+        box.style.borderColor = "#f87171";
         box.innerHTML = `▼ BEARISH PRESSURE • SELL SIGNAL (${symbol})`;
-    }
-    else {
-        box.style.background = "#f8fafc";
-        box.style.color = "#64748b";
-        box.style.borderColor = "#e2e8f0";
+    } else {
+        box.style.background = "#1e293b";
+        box.style.color = "#94a3b8";
+        box.style.borderColor = "#334155";
         box.innerHTML = `⏳ CONSOLIDATION • NO CLEAR SIGNAL (${symbol})`;
     }
 
+    // Structure
     document.getElementById("structure").innerText = data.structure || "Analyzing...";
     
+    // Confidence
     let confidenceValue = 50;
     if (data.confidence) {
-        if (typeof data.confidence === 'string' && data.confidence.includes('%')) {
-            confidenceValue = parseInt(data.confidence);
-        } else {
-            confidenceValue = parseInt(data.confidence) || 50;
-        }
+        confidenceValue = typeof data.confidence === 'string' 
+            ? parseInt(data.confidence) 
+            : data.confidence;
     }
     
     document.getElementById("confidence").innerText = confidenceValue + "%";
     document.getElementById("confidenceBar").style.width = confidenceValue + "%";
 }
 
-// চার্ট লোড
+function getSimulatedPrice(symbol) {
+    const basePrices = {
+        "EURUSD": 1.08750,
+        "XAUUSD": 1952.30,
+        "XAGUSD": 23.45,
+        "BTCUSD": 51250.00
+    };
+    
+    let base = lastPrices[symbol] || basePrices[symbol];
+    let variation = (Math.random() - 0.5) * base * 0.0002; // 0.02% variation
+    let newPrice = base + variation;
+    lastPrices[symbol] = newPrice;
+    return newPrice;
+}
+
 function loadChart(symbol, timeframe) {
     if (tvWidget) {
         try { tvWidget.remove(); } catch (e) {}
-=======
-let tvWidget = null;
-
-async function fetchSignal(symbol, tf) {
-    const res = await fetch(`${apiBaseUrl}/api/signal/?symbol=${symbol}&tf=${tf}`);
-    return await res.json();
-}
-
-async function fetchLivePrice(symbol) {
-    const res = await fetch(`${apiBaseUrl}/api/live-price/?symbol=${symbol}`);
-    return await res.json();
-}
-
-function loadChart(symbol, tf) {
-
-    if (tvWidget) {
-        tvWidget.remove();
->>>>>>> 173a5a0fb3e8eca40fa6c4b62e9003496dea3f82
         document.getElementById("main_chart").innerHTML = "";
     }
 
@@ -511,99 +545,24 @@ function loadChart(symbol, tf) {
         width: "100%",
         height: "100%",
         symbol: symbolMap[symbol],
-        interval: intervalMap[tf],
+        interval: intervalMap[timeframe],
         timezone: "Asia/Dhaka",
-        theme: "light",
+        theme: "dark",
+        style: "1",
+        locale: "en",
+        toolbar_bg: "#0f172a",
+        enable_publishing: false,
+        hide_side_toolbar: false,
         container_id: "main_chart",
-<<<<<<< HEAD
         studies: ["MACD@tv-basicstudies", "RSI@tv-basicstudies"]
-=======
-        studies: ["MACD@tv-basicstudies","RSI@tv-basicstudies"]
-    });
-}
-
-function updateSignalUI(data, symbol) {
-
-    const box = document.getElementById("signal_output");
-
-    if (data.signal === "BUY") {
-        box.style.background = "#ecfdf5";
-        box.style.color = "#10b981";
-        box.innerText = `BUY SIGNAL (${symbol})`;
-    }
-    else if (data.signal === "SELL") {
-        box.style.background = "#fef2f2";
-        box.style.color = "#ef4444";
-        box.innerText = `SELL SIGNAL (${symbol})`;
-    }
-    else {
-        box.style.background = "#f1f5f9";
-        box.style.color = "#64748b";
-        box.innerText = `NO CLEAR SIGNAL (${symbol})`;
-    }
-
-    document.getElementById("structure").innerText = data.structure || "--";
-    document.getElementById("confidence").innerText = (data.confidence || 50) + "%";
-}
-
-function updatePriceUI(symbol, price) {
-
-    if (!price) return;
-
-    let formatted;
-
-    if (symbol === "BTCUSD") formatted = price.toFixed(2);
-    else if (symbol === "XAGUSD") formatted = price.toFixed(3);
-    else if (symbol === "XAUUSD") formatted = price.toFixed(2);
-    else formatted = price.toFixed(5);
-
-    document.getElementById("live_price").innerText = formatted;
-}
-
-async function refreshDashboard() {
-
-    const symbol = document.getElementById("symbol_select").value;
-    const tf = document.getElementById("tf_select").value;
-
-    try {
-
-        const signalData = await fetchSignal(symbol, tf);
-        updateSignalUI(signalData, symbol);
-
-        const priceData = await fetchLivePrice(symbol);
-        if (priceData.price)
-            updatePriceUI(symbol, parseFloat(priceData.price));
-
-    } catch (err) {
-        console.error("API error:", err);
-    }
-}
-
-function init() {
-
-    const symbol = document.getElementById("symbol_select").value;
-    const tf = document.getElementById("tf_select").value;
-
-    loadChart(symbol, tf);
-    refreshDashboard();
-
-    document.getElementById("symbol_select").addEventListener("change", () => {
-        loadChart(symbol_select.value, tf_select.value);
-        refreshDashboard();
->>>>>>> 173a5a0fb3e8eca40fa6c4b62e9003496dea3f82
     });
 
-    document.getElementById("tf_select").addEventListener("change", () => {
-        loadChart(symbol_select.value, tf_select.value);
-        refreshDashboard();
-    });
-
-    setInterval(refreshDashboard, 5000);
+    document.getElementById("chart_title").innerText = `${symbol} • ${timeframe} • Smart Money Concepts`;
 }
 
-<<<<<<< HEAD
-// সম্পূর্ণ ড্যাশবোর্ড আপডেট
-async function updateDashboard() {
+// ==================== MAIN UPDATE FUNCTION ====================
+
+async function updateDashboard(forceRefresh = false) {
     const symbol = document.getElementById("symbol_select").value;
     const timeframe = document.getElementById("tf_select").value;
     
@@ -611,43 +570,84 @@ async function updateDashboard() {
     timeLeft = 5;
     document.getElementById("timer").innerText = timeLeft;
     
-    // চার্ট আপডেট
+    // চার্ট আপডেট (সবসময়)
     loadChart(symbol, timeframe);
     
-    // সিগন্যাল ডেটা আনা
-    await loadSMCSignal(symbol, timeframe);
+    // সিগন্যাল ডেটা আনা (ক্যাশ ব্যবহার করবে)
+    const signalData = await fetchSignalData(symbol, timeframe);
+    if (signalData) {
+        updateSignalDisplay(signalData, symbol);
+    }
     
-    // TwelveData থেকে সরাসরি প্রাইস আনা
+    // TwelveData প্রাইস আনা (রেট লিমিটেড)
     const twelvedataPrice = await fetchTwelveDataPrice(symbol);
     updatePriceDisplay(symbol, twelvedataPrice);
 }
 
-// টাইমার কাউন্টডাউন
+// ==================== EVENT HANDLERS ====================
+
+function handleSymbolChange() {
+    // সিম্বল পরিবর্তন হলে পুরনো ক্যাশ রিসেট করবেন না, কারণ TwelveData rate limit গুরুত্বপূর্ণ
+    updateDashboard(true);
+}
+
+function handleTimeframeChange() {
+    // টাইমফ্রেম পরিবর্তন হলে সিগন্যাল ক্যাশ রিসেট
+    const symbol = document.getElementById("symbol_select").value;
+    const timeframe = document.getElementById("tf_select").value;
+    const cacheKey = `${symbol}_${timeframe}`;
+    
+    // সিগন্যাল ক্যাশ রিসেট (যাতে নতুন টাইমফ্রেমের ডেটা আসে)
+    delete lastSignalCall[cacheKey];
+    delete lastSignalData[cacheKey];
+    
+    updateDashboard(true);
+}
+
+// ==================== TIMERS ====================
+
+// সিগন্যাল টাইমার (৫ সেকেন্ড) - শুধু সিগন্যাল আপডেট করে
+setInterval(async () => {
+    const symbol = document.getElementById("symbol_select").value;
+    const timeframe = document.getElementById("tf_select").value;
+    
+    // সিগন্যাল ডেটা আনা
+    const signalData = await fetchSignalData(symbol, timeframe);
+    if (signalData) {
+        updateSignalDisplay(signalData, symbol);
+    }
+    
+    // টাইমার আপডেট
+    timeLeft = 5;
+    document.getElementById("timer").innerText = timeLeft;
+    
+}, 5000);
+
+// TwelveData টাইমার (৩০ সেকেন্ড) - শুধু প্রাইস আপডেট করে
+setInterval(async () => {
+    const symbol = document.getElementById("symbol_select").value;
+    
+    // TwelveData প্রাইস আপডেট (রেট লিমিটেড)
+    const twelvedataPrice = await fetchTwelveDataPrice(symbol);
+    updatePriceDisplay(symbol, twelvedataPrice);
+    
+}, 30000);
+
+// কাউন্টডাউন টাইমার
 setInterval(() => {
     timeLeft--;
-    if(timeLeft <= 0) {
-        const symbol = document.getElementById("symbol_select").value;
-        const timeframe = document.getElementById("tf_select").value;
-        
-        // সিগন্যাল আপডেট
-        loadSMCSignal(symbol, timeframe);
-        
-        // TwelveData প্রাইস আপডেট
-        fetchTwelveDataPrice(symbol).then(price => {
-            updatePriceDisplay(symbol, price);
-        });
-        
-        timeLeft = 5;
-    }
-    document.getElementById("timer").innerText = timeLeft;
+    document.getElementById("timer").innerText = timeLeft > 0 ? timeLeft : 0;
 }, 1000);
 
-// প্রারম্ভিক লোড
+// ==================== INITIAL LOAD ====================
 updateDashboard();
-=======
-init();
->>>>>>> 173a5a0fb3e8eca40fa6c4b62e9003496dea3f82
+
+// Make functions globally available
+window.updateDashboard = updateDashboard;
+window.handleSymbolChange = handleSymbolChange;
+window.handleTimeframeChange = handleTimeframeChange;
 
 </script>
+
 </body>
 </html>
