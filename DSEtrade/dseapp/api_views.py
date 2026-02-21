@@ -1,19 +1,17 @@
-# dseapp/api_views.py
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.utils import timezone
 import random
 from datetime import datetime, timedelta
 
-# মডেল ও সার্ভিস ইম্পোর্ট
+# পুরানো SMCSignalEngine এর পরিবর্তে ProfessionalSMCEngine ইম্পোর্ট করুন
+from dseapp.signals.smc_engine import ProfessionalSMCEngine
 from dseapp.models import Candle
-from dseapp.signals.smc_engine import SMCSignalEngine
 from dseapp.services.binance_loader import fetch_and_store as fetch_binance
 from dseapp.services.twelvedata_loader import fetch_twelvedata_and_store
 
 class CurrentSignalView(APIView):
-    """Current trading signal API"""
+    """Current trading signal API using Professional SMC Engine"""
 
     def get(self, request):
         symbol = request.GET.get("symbol", "BTCUSDT")
@@ -48,131 +46,143 @@ class CurrentSignalView(APIView):
             return 'metals'
         return 'unknown'
 
-    def _handle_crypto(self, symbol, timeframe):
-        """Binance থেকে ক্রিপ্টো ডেটা নিন"""
+    def _get_candles(self, symbol, timeframe, count=200):
+        """ডাটাবেস থেকে ক্যান্ডেল ডেটা নিন"""
         qs = Candle.objects.filter(
             symbol=symbol,
             timeframe=timeframe
-        ).order_by("-time")[:200]
-
+        ).order_by("-time")[:count]
+        
         if not qs.exists():
+            return None
+            
+        candles = list(reversed(list(qs.values(
+            "time", "open", "high", "low", "close", "volume"
+        ))))
+        
+        return candles
+
+    def _handle_crypto(self, symbol, timeframe):
+        """Binance থেকে ক্রিপ্টো ডেটা নিন"""
+        candles = self._get_candles(symbol, timeframe)
+        
+        if not candles:
             try:
                 fetch_binance(symbol, timeframe)
-                qs = Candle.objects.filter(
-                    symbol=symbol,
-                    timeframe=timeframe
-                ).order_by("-time")[:200]
+                candles = self._get_candles(symbol, timeframe)
             except Exception as e:
                 print(f"Binance fetch error: {e}")
-
-        return self._analyze_candles(qs, symbol, timeframe)
+        
+        return self._analyze_with_engine(candles, symbol, timeframe)
 
     def _handle_forex_metal(self, symbol, timeframe):
         """TwelveData থেকে ফরেক্স/মেটাল ডেটা নিন"""
+        candles = self._get_candles(symbol, timeframe)
         
-        qs = Candle.objects.filter(
-            symbol=symbol,
-            timeframe=timeframe
-        ).order_by("-time")[:200]
-
-        # যদি ডেটা না থাকে বা পুরানো হয় (১ ঘণ্টার বেশি)
-        needs_fetch = False
-        if not qs.exists():
-            needs_fetch = True
-        else:
-            latest = qs.first()
-            time_diff = timezone.now() - latest.time
-            if time_diff.total_seconds() > 3600:  # ১ ঘণ্টা পুরানো
-                needs_fetch = True
-
-        if needs_fetch:
+        if not candles:
             try:
-                count = fetch_twelvedata_and_store(symbol, timeframe)
-                print(f"Fetched {count} new candles for {symbol}")
-                
-                qs = Candle.objects.filter(
-                    symbol=symbol,
-                    timeframe=timeframe
-                ).order_by("-time")[:200]
+                fetch_twelvedata_and_store(symbol, timeframe)
+                candles = self._get_candles(symbol, timeframe)
             except Exception as e:
-                print(f"Error fetching from TwelveData: {str(e)}")
-
-        return self._analyze_candles(qs, symbol, timeframe)
+                print(f"TwelveData fetch error: {e}")
+        
+        return self._analyze_with_engine(candles, symbol, timeframe)
 
     def _handle_fallback(self, symbol, timeframe):
         """কোনো ডেটা না পেলে ফallback ডেটা দিন"""
         # ডামি ক্যান্ডেল তৈরি করুন
+        candles = self._create_dummy_candles(symbol)
+        
+        if candles:
+            return self._analyze_with_engine(candles, symbol, timeframe)
+        
+        return Response({
+            "signal": "NO_DATA",
+            "confidence": 0,
+            "price": 0,
+            "structure": "No data available",
+            "symbol": symbol,
+            "timeframe": timeframe
+        })
+
+    def _create_dummy_candles(self, symbol):
+        """ডামি ক্যান্ডেল ডেটা তৈরি করুন"""
         candles = []
         now = timezone.now()
+        base_price = {
+            'EURUSD': 1.0875,
+            'XAUUSD': 1952.30,
+            'XAGUSD': 23.45,
+            'BTCUSDT': 51250.00,
+        }.get(symbol, 100.00)
         
         for i in range(100):
             time = now - timedelta(minutes=i*15)
-            base_price = 100.0 if symbol == 'UNKNOWN' else 50000.0
             change = (random.random() - 0.5) * base_price * 0.02
+            price = base_price + change
             
             candles.append({
                 'time': time,
-                'open': base_price + change * 0.9,
-                'high': base_price + change * 1.1,
-                'low': base_price + change * 0.8,
-                'close': base_price + change,
+                'open': price * 0.999,
+                'high': price * 1.002,
+                'low': price * 0.998,
+                'close': price,
+                'volume': random.randint(1000, 10000)
             })
         
         candles.reverse()
-        
-        try:
-            engine = SMCSignalEngine(candles)
-            result = engine.analyze()
-            result["price"] = float(candles[-1]["close"])
-        except:
-            result = {
-                "signal": "NEUTRAL",
-                "structure": "Fallback Mode",
-                "confidence": "50%",
-                "price": float(candles[-1]["close"])
-            }
-        
-        result["symbol"] = symbol
-        result["timeframe"] = timeframe
-        return Response(result)
+        return candles
 
-    def _analyze_candles(self, qs, symbol, timeframe):
-        """ক্যান্ডেল ডেটা অ্যানালাইসিস করুন"""
-        if not qs.exists():
+    def _analyze_with_engine(self, candles, symbol, timeframe):
+        """Professional SMC Engine দিয়ে অ্যানালাইসিস করুন"""
+        if not candles or len(candles) < 20:
             return Response({
-                "signal": "NO_DATA",
-                "confidence": "0%",
-                "price": "0.00",
-                "structure": "No data available",
+                "signal": "INSUFFICIENT_DATA",
+                "confidence": 0,
+                "price": candles[-1]['close'] if candles else 0,
+                "structure": "Insufficient data",
                 "symbol": symbol,
                 "timeframe": timeframe
             })
-
-        candles = list(reversed(list(qs.values(
-            "time", "open", "high", "low", "close"
-        ))))
-
+        
         try:
-            engine = SMCSignalEngine(candles)
+            # Professional SMC Engine ব্যবহার করুন
+            # Note: Professional engine requires 3 timeframes
+            # For now, we'll use the same candles for all timeframes
+            engine = ProfessionalSMCEngine(
+                candles_htf=candles,  # HTF as same candles
+                candles_mtf=candles,  # MTF as same candles
+                candles_ltf=candles,  # LTF as same candles
+                account_balance=10000,
+                risk_percent=1.0
+            )
+            
             result = engine.analyze()
             
-            # নিশ্চিত করুন সব ফিল্ড আছে
-            result["price"] = float(candles[-1]["close"])
-            result["symbol"] = symbol
-            result["timeframe"] = timeframe
-            result["structure"] = result.get("structure", "Analyzing...")
-            result["confidence"] = result.get("confidence", "75%")
+            response_data = {
+                "signal": result.signal,
+                "structure": result.structure,
+                "confidence": result.confidence,
+                "price": result.entry_price,
+                "symbol": symbol,
+                "timeframe": timeframe,
+                "stop_loss": result.stop_loss,
+                "take_profit_1": result.take_profit_1,
+                "take_profit_2": result.take_profit_2,
+                "take_profit_3": result.take_profit_3,
+                "risk_reward": result.risk_reward_ratio
+            }
             
         except Exception as e:
             print(f"SMC Engine Error: {e}")
-            # ইঞ্জিন এরর হলে ফallback ডেটা দিন
-            result = {
+            # Fallback to simple analysis
+            response_data = {
                 "signal": "ANALYSIS_ERROR",
-                "structure": "Pattern detection in progress",
-                "confidence": "50%",
-                "price": float(candles[-1]["close"]),
+                "structure": "Analysis in progress",
+                "confidence": 50,
+                "price": candles[-1]['close'],
                 "symbol": symbol,
                 "timeframe": timeframe
             }
         
-        return Response(result)
+        return Response(response_data)
