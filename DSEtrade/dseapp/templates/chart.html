@@ -212,6 +212,12 @@
             margin-top: 5px;
             text-align: right;
         }
+
+        .error-message {
+            color: var(--danger-red);
+            font-size: 14px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 
@@ -277,6 +283,7 @@
         <div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 10px;">
             Auto-refresh in <span id="timer">5</span>s
         </div>
+        <div id="apiStatus" style="font-size: 10px; color: var(--text-dim); text-align: center;"></div>
     </div>
 
     <div class="chart-container">
@@ -295,6 +302,7 @@ let tvWidget = null;
 let timeLeft = 5;
 let previousPrice = null;
 let lastPrices = {};
+let apiBaseUrl = 'http://127.0.0.1:8000'; // আপনার Django সার্ভারের URL
 
 const symbolMap = {
     "EURUSD": "FX:EURUSD",
@@ -313,60 +321,83 @@ const intervalMap = {
     "D1": "D"
 };
 
-// Public API endpoints for live prices (CORS-friendly)
-async function fetchLivePrice(symbol) {
-    const apiMap = {
-        "EURUSD": "https://api.exchangerate-api.com/v4/latest/USD",
-        "XAUUSD": "https://api.metals.live/v1/spot/gold",
-        "XAGUSD": "https://api.metals.live/v1/spot/silver",
-        "BTCUSD": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
-    };
+// ============================================
+// শুধুমাত্র TwelveData API ব্যবহার করা হচ্ছে
+// ============================================
 
+// TwelveData API থেকে সরাসরি প্রাইস আনার ফাংশন
+async function fetchTwelveDataPrice(symbol) {
     try {
-        let price = null;
+        // TwelveData API key (আপনার API key ব্যবহার করুন)
+        const apiKey = "59b64fd742aa4662b5c94ff01376d850";
         
-        if (symbol === "EURUSD") {
-            const response = await fetch(apiMap.EURUSD);
-            const data = await response.json();
-            price = data.rates.EUR;
-        } 
-        else if (symbol === "XAUUSD") {
-            const response = await fetch(apiMap.XAUUSD);
-            const data = await response.json();
-            price = data[0]?.price || 1950.50;
-        }
-        else if (symbol === "XAGUSD") {
-            const response = await fetch(apiMap.XAGUSD);
-            const data = await response.json();
-            price = data[1]?.price || 23.20;
-        }
-        else if (symbol === "BTCUSD") {
-            const response = await fetch(apiMap.BTCUSD);
-            const data = await response.json();
-            price = data.bitcoin.usd;
-        }
+        // সিম্বল ফরম্যাট ঠিক করা
+        let formattedSymbol = symbol;
+        if (symbol === "EURUSD") formattedSymbol = "EUR/USD";
+        else if (symbol === "XAUUSD") formattedSymbol = "XAU/USD";
+        else if (symbol === "XAGUSD") formattedSymbol = "XAG/USD";
+        else if (symbol === "BTCUSD") formattedSymbol = "BTC/USD";
         
-        return price;
+        // TwelveData API URL (শুধু প্রাইসের জন্য)
+        const url = `https://api.twelvedata.com/price?symbol=${formattedSymbol}&apikey=${apiKey}`;
+        
+        console.log(`Fetching TwelveData price for: ${formattedSymbol}`);
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.price) {
+            console.log(`✅ TwelveData price: ${data.price}`);
+            document.getElementById('apiStatus').innerText = `✓ TwelveData API`;
+            return parseFloat(data.price);
+        } else {
+            console.warn("TwelveData response:", data);
+            throw new Error('No price in response');
+        }
     } catch (error) {
-        console.log("Using simulated price for", symbol);
+        console.error("TwelveData API error:", error);
+        document.getElementById('apiStatus').innerText = `⚠️ TwelveData Error`;
+        
+        // ফ্যালব্যাক হিসেবে Django API থেকে প্রাইস আনার চেষ্টা
+        try {
+            const response = await fetch(`${apiBaseUrl}/api/signal/?symbol=${symbol}&tf=M15`);
+            const data = await response.json();
+            if (data.price) {
+                console.log(`✅ Fallback Django API price: ${data.price}`);
+                return parseFloat(data.price);
+            }
+        } catch (fallbackError) {
+            console.error("Fallback also failed");
+        }
+        
+        // সবকিছু ব্যর্থ হলে সিমুলেটেড প্রাইস
         return getSimulatedPrice(symbol);
     }
 }
 
+// সিমুলেটেড প্রাইস (শেষ অবলম্বন)
 function getSimulatedPrice(symbol) {
     const basePrices = {
         "EURUSD": 1.08750,
         "XAUUSD": 1952.30,
         "XAGUSD": 23.45,
-        "BTCUSD": loding
+        "BTCUSD": 51250.00
     };
     
     let base = basePrices[symbol];
-    let variation = (Math.random() - 0.5) * base * 0.002; // 0.2% variation
-    return base + variation;
+    if (lastPrices[symbol]) {
+        base = lastPrices[symbol];
+    }
+    
+    let variation = (Math.random() - 0.5) * base * 0.0005;
+    let newPrice = base + variation;
+    lastPrices[symbol] = newPrice;
+    return newPrice;
 }
 
+// ফরম্যাটিং ফাংশন
 function formatPrice(symbol, price) {
+    if (!price && price !== 0) return '--';
+    
     if (symbol === "BTCUSD") {
         return price.toFixed(2);
     } else if (symbol === "XAUUSD") {
@@ -378,14 +409,16 @@ function formatPrice(symbol, price) {
     }
 }
 
+// প্রাইস ডিসপ্লে আপডেট
 function updatePriceDisplay(symbol, price) {
+    if (!price && price !== 0) return;
+    
     const priceElement = document.getElementById("live_price");
     const indicator = document.getElementById("priceChangeIndicator");
     const timestamp = document.getElementById("priceTimestamp");
     
     const formattedPrice = formatPrice(symbol, price);
     
-    // Show price change indicator
     if (previousPrice) {
         if (price > previousPrice) {
             indicator.innerHTML = "▲";
@@ -396,7 +429,8 @@ function updatePriceDisplay(symbol, price) {
             indicator.style.color = "var(--danger-red)";
             priceElement.style.color = "var(--danger-red)";
         } else {
-            indicator.innerHTML = "";
+            indicator.innerHTML = "−";
+            indicator.style.color = "var(--text-dim)";
             priceElement.style.color = "var(--accent-blue)";
         }
     }
@@ -405,42 +439,33 @@ function updatePriceDisplay(symbol, price) {
     priceElement.classList.add('price-updated');
     setTimeout(() => priceElement.classList.remove('price-updated'), 500);
     
-    timestamp.innerText = `Updated: ${new Date().toLocaleTimeString()}`;
+    const now = new Date();
+    timestamp.innerText = `Updated: ${now.toLocaleTimeString()}.${now.getMilliseconds()}`;
     previousPrice = price;
 }
 
+// Django API থেকে সিগন্যাল ডেটা আনা
 async function loadSMCSignal(symbol, timeframe) {
-    const box = document.getElementById("signal_output");
-    
     try {
-        // Try Django API first
-        const response = await fetch(`/api/signal/?symbol=${symbol}&tf=${timeframe}`);
+        const response = await fetch(`${apiBaseUrl}/api/signal/?symbol=${symbol}&tf=${timeframe}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log("Signal API Response:", data);
         
         updateSignalDisplay(data, symbol);
+        return data;
         
     } catch (error) {
-        console.log("Django API not available, using simulated data");
-        
-        // Simulated SMC logic
-        const signals = ["BUY", "SELL", "NO TRADE"];
-        const structures = ["BOS Forming", "CHoCH Detected", "Liquidity Sweep", "Order Block", "FVG Found"];
-        const confidenceScore = Math.floor(Math.random() * 40) + 60; // 60-100
-        
-        const simulatedData = {
-            signal: signals[Math.floor(Math.random() * signals.length)],
-            structure: structures[Math.floor(Math.random() * structures.length)],
-            confidence: confidenceScore + "%"
-        };
-        
-        updateSignalDisplay(simulatedData, symbol);
+        console.error("Signal API error:", error);
+        return null;
     }
-    
-    // Always fetch live price separately
-    const livePrice = await fetchLivePrice(symbol);
-    updatePriceDisplay(symbol, livePrice);
 }
 
+// সিগন্যাল ডিসপ্লে আপডেট
 function updateSignalDisplay(data, symbol) {
     const box = document.getElementById("signal_output");
     
@@ -465,19 +490,24 @@ function updateSignalDisplay(data, symbol) {
 
     document.getElementById("structure").innerText = data.structure || "Analyzing...";
     
-    const confidenceValue = data.confidence ? parseInt(data.confidence) : 75;
+    let confidenceValue = 50;
+    if (data.confidence) {
+        if (typeof data.confidence === 'string' && data.confidence.includes('%')) {
+            confidenceValue = parseInt(data.confidence);
+        } else {
+            confidenceValue = parseInt(data.confidence) || 50;
+        }
+    }
+    
     document.getElementById("confidence").innerText = confidenceValue + "%";
     document.getElementById("confidenceBar").style.width = confidenceValue + "%";
 }
 
+// চার্ট লোড
 function loadChart(symbol, timeframe) {
-    const chartContainer = document.getElementById("main_chart");
-    
     if (tvWidget) {
-        try {
-            tvWidget.remove();
-        } catch (e) {}
-        chartContainer.innerHTML = "";
+        try { tvWidget.remove(); } catch (e) {}
+        document.getElementById("main_chart").innerHTML = "";
     }
 
     tvWidget = new TradingView.widget({
@@ -493,49 +523,54 @@ function loadChart(symbol, timeframe) {
         enable_publishing: false,
         hide_side_toolbar: false,
         container_id: "main_chart",
-        studies: [
-            "MACD@tv-basicstudies",
-            "RSI@tv-basicstudies"
-        ]
+        studies: ["MACD@tv-basicstudies", "RSI@tv-basicstudies"]
     });
 
     document.getElementById("chart_title").innerText = `${symbol} • ${timeframe} • Smart Money Concepts`;
 }
 
-function updateDashboard() {
+// সম্পূর্ণ ড্যাশবোর্ড আপডেট
+async function updateDashboard() {
     const symbol = document.getElementById("symbol_select").value;
     const timeframe = document.getElementById("tf_select").value;
     
-    // Reset timer
+    // টাইমার রিসেট
     timeLeft = 5;
     document.getElementById("timer").innerText = timeLeft;
     
-    // Update chart and signals
+    // চার্ট আপডেট
     loadChart(symbol, timeframe);
-    loadSMCSignal(symbol, timeframe);
+    
+    // সিগন্যাল ডেটা আনা
+    await loadSMCSignal(symbol, timeframe);
+    
+    // TwelveData থেকে সরাসরি প্রাইস আনা
+    const twelvedataPrice = await fetchTwelveDataPrice(symbol);
+    updatePriceDisplay(symbol, twelvedataPrice);
 }
 
-// Timer countdown
+// টাইমার কাউন্টডাউন
 setInterval(() => {
     timeLeft--;
     if(timeLeft <= 0) {
         const symbol = document.getElementById("symbol_select").value;
         const timeframe = document.getElementById("tf_select").value;
+        
+        // সিগন্যাল আপডেট
         loadSMCSignal(symbol, timeframe);
+        
+        // TwelveData প্রাইস আপডেট
+        fetchTwelveDataPrice(symbol).then(price => {
+            updatePriceDisplay(symbol, price);
+        });
+        
         timeLeft = 5;
     }
     document.getElementById("timer").innerText = timeLeft;
 }, 1000);
 
-// Initial load
+// প্রারম্ভিক লোড
 updateDashboard();
-
-// Additional price update every 3 seconds for smoother updates
-setInterval(async () => {
-    const symbol = document.getElementById("symbol_select").value;
-    const livePrice = await fetchLivePrice(symbol);
-    updatePriceDisplay(symbol, livePrice);
-}, 3000);
 
 </script>
 
