@@ -7,7 +7,7 @@ Liquidity Detection
 
 from typing import Dict, List, Tuple, Optional
 import numpy as np
-
+from .utils import find_swing_points
 
 def detect_liquidity(candles: List[Dict], lookback: int = 50) -> bool:
     """

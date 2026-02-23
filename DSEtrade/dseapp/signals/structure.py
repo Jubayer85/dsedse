@@ -5,15 +5,16 @@ Market Structure Detection
 - Trend Analysis
 """
 
-import numpy as np
-from typing import Dict, List, Tuple, Optional
-from .utils import find_swing_points 
+from typing import Dict, List, Optional
 
 
 def find_swing_points(candles: List[Dict], left_bars: int = 5, right_bars: int = 5) -> Dict:
     """
     Find swing highs and lows
     """
+    if len(candles) < left_bars + right_bars + 1:
+        return {'swing_highs': [], 'swing_lows': []}
+    
     highs = [c['high'] for c in candles]
     lows = [c['low'] for c in candles]
     
@@ -22,21 +23,41 @@ def find_swing_points(candles: List[Dict], left_bars: int = 5, right_bars: int =
     
     for i in range(left_bars, len(candles) - right_bars):
         # Swing High
-        if all(highs[i] > highs[i-j] for j in range(1, left_bars+1)) and \
-           all(highs[i] > highs[i+j] for j in range(1, right_bars+1)):
+        is_swing_high = True
+        for j in range(1, left_bars + 1):
+            if highs[i] <= highs[i - j]:
+                is_swing_high = False
+                break
+        if is_swing_high:
+            for j in range(1, right_bars + 1):
+                if highs[i] <= highs[i + j]:
+                    is_swing_high = False
+                    break
+        
+        if is_swing_high:
             swing_highs.append({
                 'index': i,
                 'price': highs[i],
-                'time': candles[i]['time']
+                'time': candles[i].get('time', i)
             })
         
         # Swing Low
-        if all(lows[i] < lows[i-j] for j in range(1, left_bars+1)) and \
-           all(lows[i] < lows[i+j] for j in range(1, right_bars+1)):
+        is_swing_low = True
+        for j in range(1, left_bars + 1):
+            if lows[i] >= lows[i - j]:
+                is_swing_low = False
+                break
+        if is_swing_low:
+            for j in range(1, right_bars + 1):
+                if lows[i] >= lows[i + j]:
+                    is_swing_low = False
+                    break
+        
+        if is_swing_low:
             swing_lows.append({
                 'index': i,
                 'price': lows[i],
-                'time': candles[i]['time']
+                'time': candles[i].get('time', i)
             })
     
     return {
@@ -50,6 +71,9 @@ def detect_structure(candles: List[Dict]) -> str:
     Detect current market structure
     Returns: 'bullish', 'bearish', 'ranging', 'accumulation', 'distribution'
     """
+    if len(candles) < 10:
+        return 'ranging'
+    
     swings = find_swing_points(candles, left_bars=3, right_bars=3)
     
     if len(swings['swing_highs']) < 2 or len(swings['swing_lows']) < 2:
@@ -91,6 +115,9 @@ def detect_mss(candles: List[Dict]) -> bool:
     - Bullish MSS: Price breaks above previous high
     - Bearish MSS: Price breaks below previous low
     """
+    if len(candles) < 10:
+        return False
+    
     swings = find_swing_points(candles, left_bars=3, right_bars=3)
     
     if len(swings['swing_highs']) < 2 or len(swings['swing_lows']) < 2:
