@@ -1,412 +1,470 @@
 """
 Professional SMC Trading Engine
-Features:
 - Multi-timeframe Analysis
-- Order Blocks + Breaker Blocks
-- Fair Value Gaps (FVG)
-- Liquidity Sweeps
-- Market Structure Shifts (MSS)
-- Risk Management (SL/TP)
-- Position Sizing
-- Confidence Scoring
+- Signal Generation with Liquidity/Breaker
+- Entry/Exit Levels with Stop Loss & Take Profit
+- Risk Management Integration
 """
 
-import math
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from datetime import datetime
+import numpy as np
 
 from .structure import detect_structure, detect_mss
-from .liquidity import detect_liquidity, detect_liquidity_levels
-from .breaker import detect_breaker_block
+from .liquidity import detect_liquidity, detect_liquidity_levels, detect_liquidity_sweep
+from .breaker import detect_breaker_block, detect_breaker
 from .fvg import detect_fvg, validate_fvg
 from .order_block import detect_order_block, validate_ob
-from .mitigation import detect_mitigation, detect_order_block_mitigation, detect_fvg_mitigation
-from .imbalance import detect_imbalance, detect_volume_imbalance
+from .risk_manager import RiskManager
 from .utils import calculate_atr, find_swing_points
 
 
 @dataclass
-class SignalResult:
-    """Complete Signal Output Structure"""
-    signal: str = "NO_TRADE"  # 'BUY', 'SELL', 'NO_TRADE'
-    direction: str = "NO_TRADE"  # 'LONG', 'SHORT'
-    confidence: int = 0  # 0-100
-    entry_price: float = 0.0
-    stop_loss: float = 0.0
-    take_profit_1: float = 0.0  # 1:2 RR
-    take_profit_2: float = 0.0  # 1:3 RR
-    take_profit_3: float = 0.0  # 1:5 RR
-    risk_reward_ratio: float = 0.0
-    position_size: float = 0.0  # in units
-    structure: str = "unknown"
-    liquidity_swept: bool = False
-    order_block: Optional[Dict] = None
-    fvg: Optional[Dict] = None
-    breaker_block: Optional[Dict] = None
-    market_structure_shift: bool = False
-    timeframes: Dict = field(default_factory=dict)
-    explanation: List[str] = field(default_factory=list)
+class TradeSignal:
+    """Complete Trade Signal Structure"""
+    # Basic Info
+    symbol: str = "XAUUSD"
+    timeframe: str = "15m"
     timestamp: datetime = field(default_factory=datetime.now)
+    
+    # Signal
+    signal: str = "NO_TRADE"  # STRONG_BUY, BUY, WEAK_BUY, NO_TRADE, WEAK_SELL, SELL, STRONG_SELL
+    direction: str = "NEUTRAL"  # LONG, SHORT, NEUTRAL
+    confidence: int = 0  # 0-100
+    
+    # Structure
+    htf_structure: str = "neutral"
+    mtf_structure: str = "neutral"
+    ltf_structure: str = "neutral"
+    
+    # Factors
+    liquidity_swept: bool = False
+    breaker_detected: bool = False
+    fvg_detected: bool = False
+    order_block_detected: bool = False
+    mss_detected: bool = False
+    
+    # Entry Levels
+    entry_price: float = 0.0
+    entry_min: float = 0.0
+    entry_max: float = 0.0
+    
+    # Exit Levels
+    stop_loss: float = 0.0
+    take_profit_1: float = 0.0
+    take_profit_2: float = 0.0
+    take_profit_3: float = 0.0
+    
+    # Risk Management
+    risk_percent: float = 1.0
+    position_size: float = 0.0
+    position_value: float = 0.0
+    risk_amount: float = 0.0
+    reward_potential: Dict[str, float] = field(default_factory=dict)
+    
+    # Market Data
+    current_price: float = 0.0
+    atr: float = 0.0
+    
+    # Explanation
+    explanation: List[str] = field(default_factory=list)
 
 
 class ProfessionalSMCEngine:
     """
-    Professional SMC Trading Engine with Multi-Timeframe Analysis
+    Advanced SMC Signal Engine with Complete Trade Management
     """
     
     def __init__(self, 
-                 candles_htf: List[Dict[str, Any]],  # Higher Timeframe (1H/4H)
-                 candles_mtf: List[Dict[str, Any]],  # Medium Timeframe (15M/30M)
-                 candles_ltf: List[Dict[str, Any]],  # Lower Timeframe (1M/5M)
+                 candles_htf: List[Dict[str, Any]],
+                 candles_mtf: List[Dict[str, Any]],
+                 candles_ltf: List[Dict[str, Any]],
                  account_balance: float = 10000,
-                 risk_percent: float = 1.0,  # 1% risk per trade
-                 commission: float = 0.001,  # 0.1% commission
-                 slippage: float = 0.0005):  # 0.05% slippage
+                 risk_percent: float = 1.0,
+                 commission: float = 0.001,
+                 symbol: str = "XAUUSD",
+                 timeframe: str = "15m"):
         
         self.htf_candles = candles_htf
         self.mtf_candles = candles_mtf
         self.ltf_candles = candles_ltf
         
-        self.account_balance = account_balance
-        self.risk_percent = risk_percent / 100
-        self.commission = commission
-        self.slippage = slippage
+        self.symbol = symbol
+        self.timeframe = timeframe
         
         # Calculate ATR for all timeframes
-        self.atr_htf = calculate_atr(candles_htf, period=14)
-        self.atr_mtf = calculate_atr(candles_mtf, period=14)
-        self.atr_ltf = calculate_atr(candles_ltf, period=14)
+        self.atr_htf = calculate_atr(candles_htf, period=14) if candles_htf else 0
+        self.atr_mtf = calculate_atr(candles_mtf, period=14) if candles_mtf else 0
+        self.atr_ltf = calculate_atr(candles_ltf, period=14) if candles_ltf else 0
         
-        # Results Storage
-        self.last_signal = None
+        # Risk Manager
+        self.risk_manager = RiskManager(
+            account_balance=account_balance,
+            risk_percent=risk_percent,
+            commission=commission
+        )
         
-    def analyze(self) -> SignalResult:
+        self.current_price = candles_ltf[-1]['close'] if candles_ltf else 0
+        
+    def analyze(self) -> TradeSignal:
         """
-        Complete Multi-Timeframe SMC Analysis
+        Complete Multi-timeframe SMC Analysis
         """
-        
         # Step 1: HTF Analysis (Trend Direction)
-        htf_structure = detect_structure(self.htf_candles)
-        htf_liquidity = detect_liquidity_levels(self.htf_candles)
-        htf_ob = detect_order_block(self.htf_candles)
-        htf_mss = detect_mss(self.htf_candles)
+        htf_structure = detect_structure(self.htf_candles) if self.htf_candles else "neutral"
+        htf_liquidity = detect_liquidity_levels(self.htf_candles) if self.htf_candles else {}
+        htf_mss = detect_mss(self.htf_candles) if self.htf_candles else False
         
         # Step 2: MTF Analysis (Setup)
-        mtf_structure = detect_structure(self.mtf_candles)
-        mtf_liquidity = detect_liquidity(self.mtf_candles)
-        mtf_fvg = detect_fvg(self.mtf_candles)
-        mtf_breaker = detect_breaker_block(self.mtf_candles)
-        mtf_imbalance = detect_imbalance(self.mtf_candles)
-        mtf_ob = detect_order_block(self.mtf_candles)  # ✅ This was missing
+        mtf_structure = detect_structure(self.mtf_candles) if self.mtf_candles else "neutral"
+        mtf_liquidity_sweep = detect_liquidity_sweep(self.mtf_candles) if self.mtf_candles else False
+        mtf_breaker = detect_breaker_block(self.mtf_candles) if self.mtf_candles else None
+        mtf_fvg = detect_fvg(self.mtf_candles) if self.mtf_candles else None
+        mtf_ob = detect_order_block(self.mtf_candles) if self.mtf_candles else None
         
         # Step 3: LTF Analysis (Entry)
-        ltf_structure = detect_structure(self.ltf_candles)
-        ltf_liquidity = detect_liquidity(self.ltf_candles)
-        ltf_fvg = detect_fvg(self.ltf_candles)
-        ltf_mitigation = detect_mitigation(self.ltf_candles)
+        ltf_structure = detect_structure(self.ltf_candles) if self.ltf_candles else "neutral"
+        ltf_liquidity = detect_liquidity(self.ltf_candles) if self.ltf_candles else False
+        ltf_fvg = detect_fvg(self.ltf_candles) if self.ltf_candles else None
         
-        # Step 4: Calculate Current Price
-        current_price = self.ltf_candles[-1]['close'] if self.ltf_candles else 0
+        # Step 4: Calculate Confidence Score
+        confidence, factors = self._calculate_confidence({
+            'htf_structure': htf_structure in ['bullish', 'bearish'],
+            'htf_mss': htf_mss,
+            'mtf_liquidity_sweep': mtf_liquidity_sweep,
+            'mtf_breaker': mtf_breaker is not None,
+            'mtf_fvg': mtf_fvg is not None,
+            'mtf_ob': mtf_ob is not None,
+            'ltf_fvg': ltf_fvg is not None,
+            'ltf_liquidity': ltf_liquidity
+        })
         
         # Step 5: Determine Trade Direction
         direction = self._determine_direction(
             htf_structure, mtf_structure, ltf_structure
         )
         
-        # Step 6: Calculate Confidence Score
-        confidence = self._calculate_confidence({
-            'htf_structure': htf_structure in ['bullish', 'bearish'],
-            'htf_ob': htf_ob is not None,
-            'htf_mss': htf_mss,
-            'mtf_fvg': mtf_fvg is not None,
-            'mtf_breaker': mtf_breaker is not None,
-            'mtf_liquidity': mtf_liquidity,
-            'ltf_fvg': ltf_fvg is not None,
-            'ltf_mitigation': ltf_mitigation,
-            'ltf_liquidity': ltf_liquidity,
-            'mtf_imbalance': mtf_imbalance,
-            'mtf_ob': mtf_ob is not None  # ✅ Added to confidence calculation
-        })
+        # Step 6: Generate Signal based on confidence and factors
+        signal = self._generate_signal(direction, confidence, factors)
         
-        # Step 7: Calculate Entry, SL, TP
+        # Step 7: Calculate Entry Levels
         entry_data = self._calculate_entry_levels(
-            direction, current_price, ltf_fvg, htf_ob, htf_liquidity
+            direction, mtf_fvg, mtf_ob, mtf_breaker
         )
         
-        # Step 8: Calculate Position Size
-        position_size = self._calculate_position_size(
+        # Step 8: Calculate Exit Levels (SL/TP)
+        exit_data = self._calculate_exit_levels(
+            direction, entry_data['entry'], self.atr_ltf
+        )
+        
+        # Step 9: Calculate Position Size
+        position_data = self.risk_manager.calculate_position_size(
             entry_price=entry_data['entry'],
-            stop_loss=entry_data['sl'],
-            current_price=current_price
-        )
-        
-        # Step 9: Generate Signal
-        signal = self._generate_signal(
-            direction=direction,
-            confidence=confidence,
-            entry_data=entry_data
-        )
+            stop_loss=exit_data['stop_loss'],
+            current_price=self.current_price
+        ) if hasattr(self.risk_manager, 'calculate_position_size') else {
+            'size': 0,
+            'value': 0,
+            'risk_amount': 0,
+            'reward_potential': {}
+        }
         
         # Step 10: Build Explanation
         explanation = self._build_explanation(
-            direction, confidence, htf_structure, mtf_fvg, ltf_fvg,
-            htf_ob, mtf_breaker, htf_mss, mtf_liquidity
+            direction, confidence, factors,
+            entry_data, exit_data, position_data
         )
         
-        # Step 11: Create Result Object
-        result = SignalResult(
+        # Step 11: Create TradeSignal Object
+        signal_result = TradeSignal(
+            symbol=self.symbol,
+            timeframe=self.timeframe,
             signal=signal,
-            direction=direction.upper() if direction and direction != "NO_TRADE" else 'NO_TRADE',
+            direction=direction.upper() if direction else "NEUTRAL",
             confidence=confidence,
+            htf_structure=htf_structure,
+            mtf_structure=mtf_structure,
+            ltf_structure=ltf_structure,
+            liquidity_swept=mtf_liquidity_sweep,
+            breaker_detected=mtf_breaker is not None,
+            fvg_detected=mtf_fvg is not None or ltf_fvg is not None,
+            order_block_detected=mtf_ob is not None,
+            mss_detected=htf_mss,
             entry_price=entry_data['entry'],
-            stop_loss=entry_data['sl'],
-            take_profit_1=entry_data['tp1'],
-            take_profit_2=entry_data['tp2'],
-            take_profit_3=entry_data['tp3'],
-            risk_reward_ratio=entry_data['rr'],
-            position_size=position_size,
-            structure=f"HTF: {htf_structure} | MTF: {mtf_structure} | LTF: {ltf_structure}",
-            liquidity_swept=mtf_liquidity or ltf_liquidity,
-            order_block=htf_ob or mtf_ob,
-            fvg=mtf_fvg or ltf_fvg,
-            breaker_block=mtf_breaker,
-            market_structure_shift=htf_mss,
-            timeframes={
-                'HTF': htf_structure,
-                'MTF': mtf_structure,
-                'LTF': ltf_structure
-            },
-            explanation=explanation,
-            timestamp=datetime.now()
+            entry_min=entry_data['min'],
+            entry_max=entry_data['max'],
+            stop_loss=exit_data['stop_loss'],
+            take_profit_1=exit_data['tp1'],
+            take_profit_2=exit_data['tp2'],
+            take_profit_3=exit_data['tp3'],
+            risk_percent=self.risk_manager.risk_percent * 100 if hasattr(self.risk_manager, 'risk_percent') else 1.0,
+            position_size=position_data.get('size', 0),
+            position_value=position_data.get('value', 0),
+            risk_amount=position_data.get('risk_amount', 0),
+            reward_potential=position_data.get('reward_potential', {}),
+            current_price=self.current_price,
+            atr=self.atr_ltf,
+            explanation=explanation
         )
         
-        self.last_signal = result
-        return result
+        return signal_result
+    
+    def _calculate_confidence(self, factors: Dict[str, bool]) -> Tuple[int, Dict]:
+        """
+        Calculate confidence score with detailed factor breakdown
+        """
+        weights = {
+            'htf_structure': 25,
+            'htf_mss': 15,
+            'mtf_liquidity_sweep': 15,
+            'mtf_breaker': 15,
+            'mtf_fvg': 10,
+            'mtf_ob': 10,
+            'ltf_fvg': 5,
+            'ltf_liquidity': 5
+        }
+        
+        score = 0
+        active_factors = {}
+        
+        for key, weight in weights.items():
+            if factors.get(key, False):
+                score += weight
+                factor_name = key.replace('_', ' ').title()
+                active_factors[factor_name] = weight
+        
+        # Bonus for multiple confirmations
+        factor_count = len(active_factors)
+        if factor_count >= 4:
+            score = min(100, score + 10)
+        if factor_count >= 6:
+            score = min(100, score + 15)
+        
+        return min(100, score), active_factors
     
     def _determine_direction(self, htf: str, mtf: str, ltf: str) -> Optional[str]:
         """
         Determine trade direction based on multi-timeframe alignment
         """
-        # Bullish Alignment
+        # Strong Bullish (all aligned)
+        if htf == 'bullish' and mtf == 'bullish' and ltf == 'bullish':
+            return 'strong_long'
+        
+        # Bullish
         if htf in ['bullish', 'accumulation'] and mtf in ['bullish', 'pullback']:
             if ltf in ['bullish', 'breakout']:
                 return 'long'
         
-        # Bearish Alignment
+        # Strong Bearish (all aligned)
+        if htf == 'bearish' and mtf == 'bearish' and ltf == 'bearish':
+            return 'strong_short'
+        
+        # Bearish
         if htf in ['bearish', 'distribution'] and mtf in ['bearish', 'pullback']:
             if ltf in ['bearish', 'breakout']:
                 return 'short'
         
-        # Strong Bullish (all timeframes aligned)
-        if htf == 'bullish' and mtf == 'bullish' and ltf == 'bullish':
-            return 'strong_long'
-        
-        # Strong Bearish (all timeframes aligned)
-        if htf == 'bearish' and mtf == 'bearish' and ltf == 'bearish':
-            return 'strong_short'
-        
         return None
     
-    def _calculate_confidence(self, factors: Dict[str, bool]) -> int:
+    def _generate_signal(self, direction: Optional[str], confidence: int, 
+                        factors: Dict) -> str:
         """
-        Calculate confidence score (0-100) based on multiple factors
+        Generate final signal with strength indication
         """
-        weights = {
-            'htf_structure': 20,
-            'htf_ob': 15,
-            'htf_mss': 15,
-            'mtf_fvg': 12,
-            'mtf_breaker': 12,
-            'mtf_liquidity': 8,
-            'ltf_fvg': 8,
-            'ltf_mitigation': 5,
-            'ltf_liquidity': 5,
-            'mtf_imbalance': 5,
-            'mtf_ob': 10  # ✅ Added weight for MTF Order Block
-        }
+        if not direction or confidence < 50:
+            return "NO_TRADE"
         
-        score = 0
+        # Check for liquidity sweep and breaker (high probability setups)
+        has_liquidity = any('liquidity' in k.lower() for k in factors.keys())
+        has_breaker = any('breaker' in k.lower() for k in factors.keys())
         
-        for key, weight in weights.items():
-            if factors.get(key, False):
-                score += weight
-        
-        # Bonus for multiple confirmations
-        confirmation_count = sum(1 for v in factors.values() if v)
-        if confirmation_count >= 5:
-            score = min(100, score + 10)
-        if confirmation_count >= 7:
-            score = min(100, score + 15)
-        
-        return min(100, score)
-    
-    def _calculate_entry_levels(self, direction: Optional[str], current_price: float, 
-                               ltf_fvg: Optional[Dict], htf_ob: Optional[Dict], 
-                               htf_liquidity: Dict) -> Dict[str, float]:
-        """
-        Calculate Entry, Stop Loss, and Take Profit levels
-        """
-        atr = self.atr_ltf if self.atr_ltf > 0 else 10  # Use LTF ATR for precision
-        
-        if not direction or direction == "NO_TRADE":
-            return {
-                'entry': current_price,
-                'sl': current_price,
-                'tp1': current_price,
-                'tp2': current_price,
-                'tp3': current_price,
-                'rr': 0
-            }
-        
-        # LONG Trade
         if 'long' in direction.lower():
-            # Entry
-            if ltf_fvg and ltf_fvg.get('entry'):
-                entry = ltf_fvg['entry']
-            elif htf_ob and htf_ob.get('entry'):
-                entry = htf_ob['entry']
+            if confidence >= 80 and (has_liquidity or has_breaker):
+                return "STRONG_BUY"
+            elif confidence >= 60:
+                return "BUY"
             else:
-                entry = current_price
-            
-            # Stop Loss
-            sl_distance = atr * 1.5  # 1.5 ATR stop
-            sl = entry - sl_distance
-            
-            # Take Profits (Multiple Targets)
-            tp1_distance = sl_distance * 2  # 1:2 RR
-            tp2_distance = sl_distance * 3  # 1:3 RR
-            tp3_distance = sl_distance * 5  # 1:5 RR
-            
-            tp1 = entry + tp1_distance
-            tp2 = entry + tp2_distance
-            tp3 = entry + tp3_distance
-            
-            rr = tp1_distance / sl_distance if sl_distance > 0 else 0
-            
-        # SHORT Trade
-        elif 'short' in direction.lower():
-            if ltf_fvg and ltf_fvg.get('entry'):
-                entry = ltf_fvg['entry']
-            elif htf_ob and htf_ob.get('entry'):
-                entry = htf_ob['entry']
-            else:
-                entry = current_price
-            
-            sl_distance = atr * 1.5
-            sl = entry + sl_distance
-            
-            tp1_distance = sl_distance * 2
-            tp2_distance = sl_distance * 3
-            tp3_distance = sl_distance * 5
-            
-            tp1 = entry - tp1_distance
-            tp2 = entry - tp2_distance
-            tp3 = entry - tp3_distance
-            
-            rr = tp1_distance / sl_distance if sl_distance > 0 else 0
+                return "WEAK_BUY"
         
-        else:
-            return {
-                'entry': current_price,
-                'sl': current_price,
-                'tp1': current_price,
-                'tp2': current_price,
-                'tp3': current_price,
-                'rr': 0
-            }
+        elif 'short' in direction.lower():
+            if confidence >= 80 and (has_liquidity or has_breaker):
+                return "STRONG_SELL"
+            elif confidence >= 60:
+                return "SELL"
+            else:
+                return "WEAK_SELL"
+        
+        return "NO_TRADE"
+    
+    def _calculate_entry_levels(self, direction: Optional[str],
+                               fvg: Optional[Dict], ob: Optional[Dict],
+                               breaker: Optional[Dict]) -> Dict:
+        """
+        Calculate entry zone based on SMC concepts
+        """
+        if not direction or not self.current_price:
+            return {'entry': self.current_price, 'min': self.current_price, 
+                   'max': self.current_price}
+        
+        entry_zone = []
+        
+        # FVG entry
+        if fvg and fvg.get('entry'):
+            entry_zone.append(fvg['entry'])
+        
+        # Order Block entry
+        if ob and ob.get('entry'):
+            entry_zone.append(ob['entry'])
+        
+        # Breaker entry
+        if breaker and breaker.get('entry'):
+            entry_zone.append(breaker['entry'])
+        
+        # Current price as fallback
+        if not entry_zone:
+            entry_zone.append(self.current_price)
+        
+        # Calculate entry zone
+        entry = float(np.mean(entry_zone))
+        entry_min = float(min(entry_zone))
+        entry_max = float(max(entry_zone))
         
         return {
-            'entry': entry,
-            'sl': sl,
-            'tp1': tp1,
-            'tp2': tp2,
-            'tp3': tp3,
-            'rr': round(rr, 2)
+            'entry': round(entry, 2),
+            'min': round(entry_min, 2),
+            'max': round(entry_max, 2)
         }
     
-    def _calculate_position_size(self, entry_price: float, stop_loss: float, current_price: float) -> float:
+    def _calculate_exit_levels(self, direction: Optional[str], 
+                              entry: float, atr: float) -> Dict:
         """
-        Calculate position size based on risk
+        Calculate Stop Loss and Take Profit levels
         """
-        if entry_price <= 0 or stop_loss <= 0:
-            return 0
+        if not direction or entry == 0 or atr == 0:
+            return {
+                'stop_loss': entry,
+                'tp1': entry,
+                'tp2': entry,
+                'tp3': entry
+            }
         
-        # Risk amount in currency
-        risk_amount = self.account_balance * self.risk_percent
+        # ATR-based stop loss (1.5x ATR)
+        sl_distance = atr * 1.5
         
-        # Price distance to SL
-        if entry_price > stop_loss:  # Long
-            sl_distance = entry_price - stop_loss
-        else:  # Short
-            sl_distance = stop_loss - entry_price
-        
-        if sl_distance <= 0:
-            return 0
-        
-        # Position size (units)
-        position_size = risk_amount / sl_distance
-        
-        # Apply commission and slippage
-        adjusted_size = position_size * (1 - self.commission - self.slippage)
-        
-        return round(adjusted_size, 4)
-    
-    def _generate_signal(self, direction: Optional[str], confidence: int, 
-                        entry_data: Dict[str, float]) -> str:
-        """
-        Generate final signal based on confidence and risk
-        """
-        if not direction or direction == "NO_TRADE" or confidence < 60:
-            return 'NO_TRADE'
-        
-        if confidence >= 85:
-            return 'STRONG_' + direction.upper()
-        elif confidence >= 70:
-            return direction.upper()
+        if 'long' in direction.lower():
+            stop_loss = entry - sl_distance
+            tp1 = entry + (sl_distance * 2)    # 1:2 RR
+            tp2 = entry + (sl_distance * 3)    # 1:3 RR
+            tp3 = entry + (sl_distance * 5)    # 1:5 RR
         else:
-            return 'WEAK_' + direction.upper()
+            stop_loss = entry + sl_distance
+            tp1 = entry - (sl_distance * 2)
+            tp2 = entry - (sl_distance * 3)
+            tp3 = entry - (sl_distance * 5)
+        
+        return {
+            'stop_loss': round(stop_loss, 2),
+            'tp1': round(tp1, 2),
+            'tp2': round(tp2, 2),
+            'tp3': round(tp3, 2)
+        }
     
-    def _build_explanation(self, direction: Optional[str], confidence: int, 
-                          htf: str, mtf_fvg: Optional[Dict], ltf_fvg: Optional[Dict],
-                          htf_ob: Optional[Dict], mtf_breaker: Optional[Dict], 
-                          htf_mss: bool, mtf_liquidity: bool) -> List[str]:
+    def _build_explanation(self, direction: Optional[str], confidence: int,
+                          factors: Dict, entry_data: Dict, exit_data: Dict,
+                          position_data: Dict) -> List[str]:
         """
-        Build human-readable explanation of the signal
+        Build human-readable explanation
         """
         explanation = []
         
-        if not direction or direction == "NO_TRADE":
-            explanation.append("❌ No clear direction from multi-timeframe analysis")
+        if not direction:
+            explanation.append("❌ No clear trade direction detected")
             return explanation
         
-        # HTF Analysis
-        explanation.append(f"📊 HTF Trend: {htf.upper()}")
-        if htf_ob:
-            explanation.append(f"   └─ Order Block detected")
-        if htf_mss:
-            explanation.append("   └─ Market Structure Shift confirmed")
-        
-        # MTF Analysis
-        if mtf_fvg:
-            explanation.append(f"📈 FVG detected on MTF")
-        if mtf_breaker:
-            explanation.append(f"🔨 Breaker Block formed")
-        if mtf_liquidity:
-            explanation.append("💧 Liquidity sweep confirmed")
-        
-        # LTF Analysis
-        if ltf_fvg:
-            explanation.append(f"🎯 Entry FVG on LTF")
+        # Direction
+        direction_emoji = "📈" if 'long' in direction.lower() else "📉"
+        explanation.append(f"{direction_emoji} Direction: {direction.upper()}")
         
         # Confidence
-        explanation.append(f"⚡ Confidence Score: {confidence}%")
-        if confidence >= 80:
-            explanation.append("✅ High probability setup")
-        elif confidence >= 60:
-            explanation.append("⚠️ Moderate probability - use proper risk management")
+        explanation.append(f"⚡ Confidence: {confidence}%")
         
-        # Risk/Reward
-        explanation.append(f"💹 Multiple targets: 1:2, 1:3, 1:5 RR")
+        # Key Factors
+        if factors:
+            explanation.append("🎯 Key Factors:")
+            for factor, weight in factors.items():
+                explanation.append(f"   • {factor}: +{weight}")
+        
+        # Entry Zone
+        explanation.append(f"💰 Entry Zone: {entry_data['min']} - {entry_data['max']}")
+        explanation.append(f"   Optimal Entry: {entry_data['entry']}")
+        
+        # Exit Levels
+        explanation.append(f"🛑 Stop Loss: {exit_data['stop_loss']}")
+        explanation.append(f"🎯 Take Profit 1 (1:2): {exit_data['tp1']}")
+        explanation.append(f"🎯 Take Profit 2 (1:3): {exit_data['tp2']}")
+        explanation.append(f"🎯 Take Profit 3 (1:5): {exit_data['tp3']}")
+        
+        # Risk Management
+        explanation.append(f"📊 Risk: 1.0% of account")
+        if position_data.get('size', 0) > 0:
+            explanation.append(f"💵 Position Size: {position_data['size']} units")
+            explanation.append(f"💰 Risk Amount: ${position_data.get('risk_amount', 0):.2f}")
         
         return explanation
+
+
+# Backward compatibility class
+class SMCSignalEngine:
+    """
+    Legacy SMC Signal Engine for backward compatibility
+    """
+    
+    def __init__(self, candles: List[Dict]):
+        self.candles = candles
+
+    def analyze(self) -> Dict:
+        """
+        Simple SMC analysis
+        """
+        try:
+            from .structure import detect_structure
+            from .liquidity import detect_liquidity
+            from .breaker import detect_breaker
+            
+            structure = detect_structure(self.candles)
+            liquidity = detect_liquidity(self.candles)
+            breaker = detect_breaker(self.candles)
+            
+            confidence = 0
+            
+            if structure in ["bullish", "bearish"]:
+                confidence += 40
+            if liquidity:
+                confidence += 30
+            if breaker:
+                confidence += 30
+            
+            if confidence >= 70:
+                if structure == "bullish":
+                    signal = "BUY"
+                elif structure == "bearish":
+                    signal = "SELL"
+                else:
+                    signal = "NO_TRADE"
+            else:
+                signal = "NO_TRADE"
+            
+            return {
+                "signal": signal,
+                "structure": structure,
+                "confidence": confidence
+            }
+            
+        except Exception as e:
+            print(f"Legacy SMC Engine Error: {e}")
+            return {
+                "signal": "ANALYSIS_ERROR",
+                "structure": "unknown",
+                "confidence": 0
+            }
