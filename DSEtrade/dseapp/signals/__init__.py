@@ -1,4 +1,4 @@
-from .smc_engine import ProfessionalSMCEngine, TradeSignal
+from .smc_engine import ProfessionalSMCEngine
 from .structure import detect_structure, detect_mss
 from .liquidity import (
     detect_liquidity, 

@@ -1,206 +1,158 @@
 """
-Liquidity Detection
-- Stop hunts
-- Liquidity sweeps
-- Key liquidity levels
+Advanced Institutional Liquidity Detection
+- Liquidity sweeps with strength scoring
+- Volume-confirmed stop hunts
+- Wick dominance filter
+- Multi-touch liquidity zones
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, List
+from statistics import mean
 from .utils import find_swing_points
 
 
-def detect_liquidity(candles: List[Dict], lookback: int = 50) -> bool:
-    """
-    Detect if liquidity sweep occurred
-    
-    Args:
-        candles: List of candle dictionaries
-        lookback: Number of candles to look back
-    
-    Returns:
-        True if liquidity sweep detected, False otherwise
-    """
-    if len(candles) < lookback:
-        return False
-    
-    recent_candles = candles[-20:]
-    old_candles = candles[-lookback:-20]
-    
-    if len(old_candles) == 0:
-        return False
-    
-    old_high = max(c['high'] for c in old_candles)
-    old_low = min(c['low'] for c in old_candles)
-    
-    for candle in recent_candles:
-        # Sweep above old high (bullish liquidity grab)
-        if candle['high'] > old_high * 1.001 and candle['close'] < old_high:
-            return True
-        
-        # Sweep below old low (bearish liquidity grab)
-        if candle['low'] < old_low * 0.999 and candle['close'] > old_low:
-            return True
-    
-    return False
+# --------------------------------------------------
+# SWEEP STRENGTH DETECTION
+# --------------------------------------------------
 
+def detect_liquidity_sweep_strength(candles: List[Dict]) -> Dict:
+    """
+    Detect liquidity sweep and return strength score (0–100)
+    """
 
-def detect_liquidity_sweep(candles: List[Dict]) -> bool:
-    """
-    Detect explicit liquidity sweep with wick
-    
-    Args:
-        candles: List of candle dictionaries
-    
-    Returns:
-        True if liquidity sweep detected, False otherwise
-    """
-    if len(candles) < 10:
-        return False
-    
-    last_candle = candles[-1]
-    prev_candles = candles[-10:-1]
-    
-    if len(prev_candles) == 0:
-        return False
-    
-    prev_high = max(c['high'] for c in prev_candles)
-    prev_low = min(c['low'] for c in prev_candles)
-    
-    # Bullish liquidity sweep (wick above resistance, close below)
-    if last_candle['high'] > prev_high and last_candle['close'] < prev_high:
-        return True
-    
-    # Bearish liquidity sweep (wick below support, close above)
-    if last_candle['low'] < prev_low and last_candle['close'] > prev_low:
-        return True
-    
-    return False
-
-
-def detect_liquidity_levels(candles: List[Dict]) -> Dict:
-    """
-    Detect all major liquidity levels
-    
-    Args:
-        candles: List of candle dictionaries
-    
-    Returns:
-        Dictionary with liquidity levels
-    """
-    levels = {
-        'buy_stops': [],  # Above swing highs
-        'sell_stops': [],  # Below swing lows
-        'double_tops': [],
-        'double_bottoms': []
-    }
-    
     if len(candles) < 20:
+        return {"detected": False, "strength": 0, "direction": None}
+
+    last = candles[-1]
+    prev = candles[-20:-1]
+
+    prev_high = max(c["high"] for c in prev)
+    prev_low = min(c["low"] for c in prev)
+
+    body = abs(last["close"] - last["open"])
+    total_range = last["high"] - last["low"]
+
+    if total_range == 0:
+        return {"detected": False, "strength": 0, "direction": None}
+
+    wick_ratio = 1 - (body / total_range)
+
+    # Bullish sweep (took sell stops)
+    if last["low"] < prev_low and last["close"] > prev_low:
+        strength = round(wick_ratio * 100, 2)
+        return {
+            "detected": True,
+            "direction": "bullish",
+            "strength": strength
+        }
+
+    # Bearish sweep (took buy stops)
+    if last["high"] > prev_high and last["close"] < prev_high:
+        strength = round(wick_ratio * 100, 2)
+        return {
+            "detected": True,
+            "direction": "bearish",
+            "strength": strength
+        }
+
+    return {"detected": False, "strength": 0, "direction": None}
+
+
+# --------------------------------------------------
+# VOLUME CONFIRMED SWEEP
+# --------------------------------------------------
+
+def volume_confirmed_sweep(candles: List[Dict], period: int = 20) -> Dict:
+    """
+    Confirm sweep with abnormal volume
+    """
+
+    sweep = detect_liquidity_sweep_strength(candles)
+
+    if not sweep["detected"]:
+        return sweep
+
+    volumes = [c["volume"] for c in candles[-period:]]
+
+    if len(volumes) < period:
+        return sweep
+
+    avg_volume = mean(volumes[:-1])
+    last_volume = volumes[-1]
+
+    if avg_volume == 0:
+        return sweep
+
+    volume_ratio = last_volume / avg_volume
+
+    sweep["volume_ratio"] = round(volume_ratio, 2)
+
+    # Add bonus strength
+    if volume_ratio > 1.3:
+        sweep["strength"] += 15
+
+    sweep["strength"] = min(100, sweep["strength"])
+
+    return sweep
+
+
+# --------------------------------------------------
+# LIQUIDITY LEVEL STRENGTH RANKING
+# --------------------------------------------------
+
+def detect_liquidity_levels_ranked(candles: List[Dict]) -> Dict:
+    """
+    Rank liquidity levels by number of touches
+    """
+
+    levels = {
+        "buy_stops": [],
+        "sell_stops": []
+    }
+
+    if len(candles) < 30:
         return levels
-    
+
     swings = find_swing_points(candles, left_bars=5, right_bars=5)
-    
-    # Buy Stops (above swing highs)
-    for high in swings['swing_highs']:
-        levels['buy_stops'].append(round(high['price'] * 1.001, 2))
-    
-    # Sell Stops (below swing lows)
-    for low in swings['swing_lows']:
-        levels['sell_stops'].append(round(low['price'] * 0.999, 2))
-    
-    # Double Tops/Bottoms
-    if len(swings['swing_highs']) >= 2:
-        price_diff = abs(swings['swing_highs'][-1]['price'] - swings['swing_highs'][-2]['price'])
-        avg_price = (swings['swing_highs'][-1]['price'] + swings['swing_highs'][-2]['price']) / 2
-        if price_diff / avg_price < 0.005:  # 0.5% difference
-            levels['double_tops'].append(round(avg_price, 2))
-    
-    if len(swings['swing_lows']) >= 2:
-        price_diff = abs(swings['swing_lows'][-1]['price'] - swings['swing_lows'][-2]['price'])
-        avg_price = (swings['swing_lows'][-1]['price'] + swings['swing_lows'][-2]['price']) / 2
-        if price_diff / avg_price < 0.005:
-            levels['double_bottoms'].append(round(avg_price, 2))
-    
+
+    highs = [s["price"] for s in swings["swing_highs"]]
+    lows = [s["price"] for s in swings["swing_lows"]]
+
+    for high in highs:
+        touches = sum(1 for c in candles if abs(c["high"] - high) / high < 0.002)
+        levels["buy_stops"].append({
+            "price": round(high * 1.001, 2),
+            "touches": touches,
+            "strength": "strong" if touches >= 3 else "normal"
+        })
+
+    for low in lows:
+        touches = sum(1 for c in candles if abs(c["low"] - low) / low < 0.002)
+        levels["sell_stops"].append({
+            "price": round(low * 0.999, 2),
+            "touches": touches,
+            "strength": "strong" if touches >= 3 else "normal"
+        })
+
     return levels
 
 
-def detect_liquidity_grab(candles: List[Dict]) -> Dict:
-    """
-    Detect liquidity grab with direction
-    
-    Args:
-        candles: List of candle dictionaries
-    
-    Returns:
-        Dictionary with liquidity grab details
-    """
-    if len(candles) < 20:
-        return {'detected': False, 'direction': None, 'price': None}
-    
-    last_candle = candles[-1]
-    prev_candles = candles[-20:-1]
-    
-    if len(prev_candles) < 5:
-        return {'detected': False, 'direction': None, 'price': None}
-    
-    key_high = max(c['high'] for c in prev_candles)
-    key_low = min(c['low'] for c in prev_candles)
-    
-    # Bullish grab (took out sell stops)
-    if last_candle['low'] < key_low:
-        if last_candle['close'] > key_low:
-            return {
-                'detected': True,
-                'direction': 'bullish',
-                'price': key_low,
-                'type': 'sell_stops'
-            }
-    
-    # Bearish grab (took out buy stops)
-    if last_candle['high'] > key_high:
-        if last_candle['close'] < key_high:
-            return {
-                'detected': True,
-                'direction': 'bearish',
-                'price': key_high,
-                'type': 'buy_stops'
-            }
-    
-    return {'detected': False, 'direction': None, 'price': None}
+# --------------------------------------------------
+# DISPLACEMENT CONFIRMATION
+# --------------------------------------------------
 
+def displacement_after_sweep(candles: List[Dict]) -> bool:
+    """
+    Confirm strong displacement candle after liquidity grab
+    """
 
-def get_liquidity_zones(candles: List[Dict]) -> Dict:
-    """
-    Get major liquidity zones
-    
-    Args:
-        candles: List of candle dictionaries
-    
-    Returns:
-        Dictionary with liquidity zones
-    """
-    if len(candles) < 30:
-        return {'buy_zones': [], 'sell_zones': []}
-    
-    swings = find_swing_points(candles, left_bars=5, right_bars=5)
-    
-    buy_zones = []
-    sell_zones = []
-    
-    # Buy zones (above swing highs)
-    for high in swings['swing_highs'][-3:]:
-        buy_zones.append({
-            'price': round(high['price'] * 1.001, 2),
-            'strength': 'strong' if high['price'] == max(h['price'] for h in swings['swing_highs']) else 'normal'
-        })
-    
-    # Sell zones (below swing lows)
-    for low in swings['swing_lows'][-3:]:
-        sell_zones.append({
-            'price': round(low['price'] * 0.999, 2),
-            'strength': 'strong' if low['price'] == min(l['price'] for l in swings['swing_lows']) else 'normal'
-        })
-    
-    return {
-        'buy_zones': buy_zones,
-        'sell_zones': sell_zones
-    }
+    if len(candles) < 3:
+        return False
+
+    last = candles[-1]
+    prev = candles[-2]
+
+    body = abs(last["close"] - last["open"])
+    prev_body = abs(prev["close"] - prev["open"])
+
+    return body > prev_body * 1.5

@@ -4,18 +4,12 @@ from django.utils import timezone
 from datetime import timedelta
 
 from dseapp.signals.smc_engine import ProfessionalSMCEngine
-from dseapp.models import Candle
+from dseapp.models import Candle, SignalLog
 from dseapp.services.binance_loader import fetch_and_store as fetch_binance
 from dseapp.services.twelvedata_loader import fetch_twelvedata_and_store
 
 
 class CurrentSignalView(APIView):
-    """
-    Production-Ready Signal API
-    - Auto market data update
-    - True multi-timeframe loading
-    - Safe candle handling
-    """
 
     VALID_TIMEFRAMES = ['1m', '5m', '15m', '30m', '1h', '4h', '1d']
 
@@ -36,34 +30,17 @@ class CurrentSignalView(APIView):
         if timeframe not in self.VALID_TIMEFRAMES:
             timeframe = "15m"
 
-        # 1️⃣ Ensure latest candle exists
+        # 1️⃣ Ensure latest data exists
         self._ensure_fresh_data(symbol, timeframe)
 
-        # 2️⃣ Load multi-timeframe candles
-        candles_ltf = self._get_candles(symbol, timeframe)
-        candles_mtf = self._get_candles(symbol, self._get_mtf(timeframe))
-        candles_htf = self._get_candles(symbol, self._get_htf(timeframe))
+        # 2️⃣ Check if new candle closed
+        self._run_engine_if_new_candle(symbol, timeframe)
 
-        if not candles_ltf:
-            return Response({
-                "signal": "NO_DATA",
-                "confidence": 0,
-                "price": 0,
-                "structure": "No market data",
-                "symbol": symbol,
-                "timeframe": timeframe
-            })
-
-        return self._analyze_with_engine(
-            candles_htf,
-            candles_mtf,
-            candles_ltf,
-            symbol,
-            timeframe
-        )
+        # 3️⃣ Return latest cached signal
+        return self._get_latest_signal(symbol, timeframe)
 
     # --------------------------------------------------
-    # DATA FRESHNESS CHECK
+    # DATA UPDATE
     # --------------------------------------------------
 
     def _ensure_fresh_data(self, symbol, timeframe):
@@ -75,133 +52,99 @@ class CurrentSignalView(APIView):
         tf_minutes = self.TF_MINUTES.get(timeframe, 15)
 
         if not latest or latest.time < timezone.now() - timedelta(minutes=tf_minutes):
-            symbol_type = self._get_symbol_type(symbol)
-
-            if symbol_type == "crypto":
+            if symbol.endswith("USDT"):
                 fetch_binance(symbol, timeframe)
             else:
                 fetch_twelvedata_and_store(symbol, timeframe)
 
     # --------------------------------------------------
-    # MULTI TIMEFRAME MAPPING
+    # ENGINE RUN ONLY IF NEW CANDLE
     # --------------------------------------------------
 
-    def _get_mtf(self, tf):
-        mapping = {
-            "1m": "5m",
-            "5m": "15m",
-            "15m": "1h",
-            "30m": "1h",
-            "1h": "4h",
-            "4h": "1d"
-        }
-        return mapping.get(tf, tf)
+    def _run_engine_if_new_candle(self, symbol, timeframe):
 
-    def _get_htf(self, tf):
-        mapping = {
-            "1m": "15m",
-            "5m": "1h",
-            "15m": "4h",
-            "30m": "4h",
-            "1h": "1d",
-            "4h": "1d"
-        }
-        return mapping.get(tf, tf)
-
-    # --------------------------------------------------
-    # CLEAN CANDLE LOADER (NO FLOAT BUG)
-    # --------------------------------------------------
-
-    def _get_candles(self, symbol, timeframe, count=200):
-        qs = Candle.objects.filter(
+        latest_candle = Candle.objects.filter(
             symbol=symbol,
             timeframe=timeframe
-        ).order_by("-time")[:count]
+        ).order_by("-time").first()
 
-        if not qs.exists():
-            return []
+        if not latest_candle:
+            return
 
-        candles = []
-        for obj in reversed(qs):
-            candles.append({
-                "time": obj.time,
-                "open": float(obj.open),
-                "high": float(obj.high),
-                "low": float(obj.low),
-                "close": float(obj.close),
-                "volume": float(obj.volume or 0)
-            })
+        # Last generated signal
+        last_signal = SignalLog.objects.filter(
+            symbol=symbol,
+            timeframe=timeframe
+        ).order_by("-created_at").first()
 
-        return candles
+        # If already analyzed this candle → do nothing
+        if last_signal and last_signal.created_at >= latest_candle.time:
+            return
+
+        # Load candles
+        candles = list(Candle.objects.filter(
+            symbol=symbol,
+            timeframe=timeframe
+        ).order_by("time").values(
+            "time", "open", "high", "low", "close", "volume"
+        ))
+
+        if len(candles) < 50:
+            return
+
+        # Run engine
+        engine = ProfessionalSMCEngine(
+            candles_htf=candles,
+            candles_mtf=candles,
+            candles_ltf=candles,
+            account_balance=10000,
+            risk_percent=1.0
+        )
+
+        result = engine.analyze()
+
+        # Save signal
+        SignalLog.objects.create(
+            symbol=symbol,
+            timeframe=timeframe,
+            signal=result.signal,
+            direction=result.direction,
+            confidence=result.confidence,
+            entry_price=result.entry_price,
+            stop_loss=result.stop_loss,
+            take_profit_1=result.take_profit_1,
+            take_profit_2=result.take_profit_2,
+            take_profit_3=result.take_profit_3
+        )
 
     # --------------------------------------------------
-    # SYMBOL TYPE
+    # RETURN CACHED SIGNAL
     # --------------------------------------------------
 
-    def _get_symbol_type(self, symbol):
-        crypto = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT']
-        forex = ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD']
-        metals = ['XAUUSD', 'XAGUSD']
+    def _get_latest_signal(self, symbol, timeframe):
 
-        if symbol in crypto:
-            return "crypto"
-        if symbol in forex:
-            return "forex"
-        if symbol in metals:
-            return "metals"
+        signal = SignalLog.objects.filter(
+            symbol=symbol,
+            timeframe=timeframe
+        ).order_by("-created_at").first()
 
-        return "unknown"
-
-    # --------------------------------------------------
-    # ENGINE ANALYSIS
-    # --------------------------------------------------
-
-    def _analyze_with_engine(self, candles_htf, candles_mtf,
-                             candles_ltf, symbol, timeframe):
-
-        if len(candles_ltf) < 30:
+        if not signal:
             return Response({
-                "signal": "INSUFFICIENT_DATA",
+                "signal": "WAITING_FOR_CLOSE",
                 "confidence": 0,
-                "price": candles_ltf[-1]['close'],
                 "symbol": symbol,
                 "timeframe": timeframe
             })
 
-        try:
-            engine = ProfessionalSMCEngine(
-                candles_htf=candles_htf,
-                candles_mtf=candles_mtf,
-                candles_ltf=candles_ltf,
-                account_balance=10000,
-                risk_percent=1.0
-            )
-
-            result = engine.analyze()
-
-            return Response({
-                "signal": result.signal,
-                "direction": result.direction,
-                "confidence": result.confidence,
-                "entry_price": result.entry_price,
-                "stop_loss": result.stop_loss,
-                "take_profit_1": result.take_profit_1,
-                "take_profit_2": result.take_profit_2,
-                "take_profit_3": result.take_profit_3,
-                "risk_reward": result.risk_reward_ratio,
-                "position_size": result.position_size,
-                "structure": result.structure,
-                "symbol": symbol,
-                "timeframe": timeframe
-            })
-
-        except Exception as e:
-            print("SMC Engine Error:", e)
-
-            return Response({
-                "signal": "ENGINE_ERROR",
-                "confidence": 0,
-                "price": candles_ltf[-1]['close'],
-                "symbol": symbol,
-                "timeframe": timeframe
-            })
+        return Response({
+            "signal": signal.signal,
+            "direction": signal.direction,
+            "confidence": signal.confidence,
+            "entry_price": signal.entry_price,
+            "stop_loss": signal.stop_loss,
+            "take_profit_1": signal.take_profit_1,
+            "take_profit_2": signal.take_profit_2,
+            "take_profit_3": signal.take_profit_3,
+            "symbol": symbol,
+            "timeframe": timeframe
+        })

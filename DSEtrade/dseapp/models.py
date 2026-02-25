@@ -185,3 +185,23 @@ class Candle(models.Model):
 
     class Meta:
         unique_together = ("symbol", "timeframe", "time")
+
+
+class SignalLog(models.Model):
+    symbol = models.CharField(max_length=20)
+    timeframe = models.CharField(max_length=10)
+
+    signal = models.CharField(max_length=20)
+    direction = models.CharField(max_length=20)
+    confidence = models.IntegerField()
+
+    entry_price = models.FloatField()
+    stop_loss = models.FloatField()
+    take_profit_1 = models.FloatField()
+    take_profit_2 = models.FloatField()
+    take_profit_3 = models.FloatField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
