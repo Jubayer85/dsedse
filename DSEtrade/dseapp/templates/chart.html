@@ -147,13 +147,13 @@ select{
             <option>BTCUSD</option>
         </select>
         <select id="tf">
-            <option value="1m">1m</option>
-            <option value="5m">5m</option>
-            <option value="15m" selected>15m</option>
-            <option value="30m">30m</option>
-            <option value="1h">1h</option>
-            <option value="4h">4h</option>
-            <option value="1d">1d</option>
+            <option value="1">1m</option>
+            <option value="5">5m</option>
+            <option value="15" selected>15m</option>
+            <option value="30">30m</option>
+            <option value="60">1h</option>
+            <option value="240">4h</option>
+            <option value="D">1d</option>
         </select>
     </div>
 </div>
@@ -201,12 +201,13 @@ Loading chart...
 </div>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
+
 <script>
 
 const API = "http://127.0.0.1:8000/api/signal/";
-
 let widget = null;
-let lastPrice = null;
+let currentSymbol = null;
+let currentTF = null;
 
 const tvSymbol = {
     XAUUSD:"OANDA:XAUUSD",
@@ -216,45 +217,45 @@ const tvSymbol = {
 };
 
 function loadChart(symbol, tf){
+
     if(widget){
-        try{widget.remove()}catch{}
+        try{ widget.remove(); }catch{}
         document.getElementById("main_chart").innerHTML="";
     }
 
     widget = new TradingView.widget({
-        symbol:tvSymbol[symbol],
-        interval:tf.replace("m","").replace("h","60").replace("d","D"),
-        timezone:"Asia/Dhaka",
-        theme:"dark",
-        style:"1",
-        container_id:"main_chart"
+        symbol: tvSymbol[symbol],
+        interval: tf,
+        timezone: "Asia/Dhaka",
+        theme: "dark",
+        style: "1",
+        locale: "en",
+        container_id: "main_chart",
+        enable_publishing: false,
+        hide_side_toolbar: false,
+        allow_symbol_change: false,
+        studies: [
+            "Volume@tv-basicstudies",
+            "RSI@tv-basicstudies",
+            "MACD@tv-basicstudies"
+        ]
     });
 
     document.getElementById("chartTitle").innerText =
-        symbol + " • " + tf + " • Smart Money Concepts";
+        `${symbol} • ${tf} • Smart Money Concepts`;
 }
 
-function formatStructure(str){
-    if(!str) return "--";
-    return str.split("|").map(s=>{
-        s=s.trim();
-        if(s.includes("bullish")) return `<span style="color:#22c55e">${s}</span>`;
-        if(s.includes("bearish")) return `<span style="color:#ef4444">${s}</span>`;
-        return s;
-    }).join("<br>");
-}
-
-function updateSignal(data,symbol){
+function updateSignal(data){
 
     const box=document.getElementById("signalBox");
     const conf=parseInt(data.confidence||0);
 
-    if(data.signal.includes("LONG")){
+    if(data.signal?.includes("LONG")){
         box.style.background="#052e1c";
         box.style.color="#22c55e";
         box.innerHTML="▲ BULLISH BIAS • "+data.signal;
     }
-    else if(data.signal.includes("SHORT")){
+    else if(data.signal?.includes("SHORT")){
         box.style.background="#3b0a0a";
         box.style.color="#ef4444";
         box.innerHTML="▼ BEARISH BIAS • "+data.signal;
@@ -265,10 +266,8 @@ function updateSignal(data,symbol){
         box.innerHTML="NO CLEAR TRADE";
     }
 
-    document.getElementById("structure").innerHTML =
-        formatStructure(data.structure);
-
-    document.getElementById("confidence").innerText=conf+"%";
+    document.getElementById("structure").innerHTML = data.structure || "--";
+    document.getElementById("confidence").innerText = conf+"%";
 
     const fill=document.getElementById("confFill");
     fill.style.width=conf+"%";
@@ -278,12 +277,17 @@ function updateSignal(data,symbol){
         "#ef4444";
 
     document.getElementById("levels").innerHTML=`
-        Entry: ${data.entry_price}<br>
-        SL: ${data.stop_loss}<br>
-        TP1: ${data.take_profit_1}<br>
-        TP2: ${data.take_profit_2}<br>
-        TP3: ${data.take_profit_3}
+        Entry: ${data.entry_price || "-"}<br>
+        SL: ${data.stop_loss || "-"}<br>
+        TP1: ${data.take_profit_1 || "-"}<br>
+        TP2: ${data.take_profit_2 || "-"}<br>
+        TP3: ${data.take_profit_3 || "-"}
     `;
+
+    if(data.entry_price){
+        document.getElementById("price").innerText =
+            parseFloat(data.entry_price).toFixed(2);
+    }
 }
 
 async function update(){
@@ -291,19 +295,16 @@ async function update(){
     const symbol=document.getElementById("symbol").value;
     const tf=document.getElementById("tf").value;
 
-    loadChart(symbol,tf);
+    if(symbol!==currentSymbol || tf!==currentTF){
+        loadChart(symbol,tf);
+        currentSymbol=symbol;
+        currentTF=tf;
+    }
 
     try{
-        const res=await fetch(API+`?symbol=${symbol}&tf=${tf}`);
+        const res=await fetch(`${API}?symbol=${symbol}&tf=${tf}`);
         const data=await res.json();
-
-        updateSignal(data,symbol);
-
-        if(data.entry_price){
-            const p=parseFloat(data.entry_price);
-            document.getElementById("price").innerText=p.toFixed(2);
-            lastPrice=p;
-        }
+        updateSignal(data);
     }
     catch{
         console.log("API error");

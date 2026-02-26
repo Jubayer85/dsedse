@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from .views.tv_views import TVSymbolInfoView, TVHistoryView
 from .api_views import CurrentSignalView  
+from .views.main_views import CandleDataView
 
 # app_name = "dseapp"  # যদি প্রয়োজন হয় তাহলে আনকমেন্ট করুন
 
@@ -33,4 +34,7 @@ urlpatterns = [
     path("api/signal/", CurrentSignalView.as_view(), name="current-signal"),
     path('api/tv/symbol-info/', TVSymbolInfoView.as_view(), name='tv-symbol-info'),
     path('api/tv/history/', TVHistoryView.as_view(), name='tv-history'),
+    path("api/candles/", CandleDataView.as_view())
+
+
 ]

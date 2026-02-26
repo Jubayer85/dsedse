@@ -260,3 +260,33 @@ def analysis(request):
     }
     
     return render(request, 'analysis.html', context)
+
+# views.py
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from dseapp.models import Candle
+
+class CandleDataView(APIView):
+
+    def get(self, request):
+        symbol = request.GET.get("symbol", "XAUUSD")
+        tf = request.GET.get("tf", "15m")
+
+        candles = Candle.objects.filter(
+            symbol=symbol,
+            timeframe=tf
+        ).order_by("time")[:300]
+
+        data = []
+
+        for c in candles:
+            data.append({
+                "time": int(c.time.timestamp()),
+                "open": float(c.open),
+                "high": float(c.high),
+                "low": float(c.low),
+                "close": float(c.close),
+            })
+
+        return Response(data)
