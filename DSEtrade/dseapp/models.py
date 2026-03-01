@@ -188,20 +188,32 @@ class Candle(models.Model):
 
 
 class SignalLog(models.Model):
+
     symbol = models.CharField(max_length=20)
     timeframe = models.CharField(max_length=10)
 
-    signal = models.CharField(max_length=20)
-    direction = models.CharField(max_length=20)
-    confidence = models.IntegerField()
+    # Primary summary (optional quick filter)
+    signal = models.CharField(max_length=50, default="MULTI_LAYER")
+    direction = models.CharField(max_length=20, default="MULTI")
+    confidence = models.IntegerField(default=0)
 
-    entry_price = models.FloatField()
-    stop_loss = models.FloatField()
-    take_profit_1 = models.FloatField()
-    take_profit_2 = models.FloatField()
-    take_profit_3 = models.FloatField()
+    entry_price = models.FloatField(default=0)
+    stop_loss = models.FloatField(default=0)
+    take_profit_1 = models.FloatField(default=0)
+    take_profit_2 = models.FloatField(default=0)
+    take_profit_3 = models.FloatField(default=0)
+
+    # 🔥 NEW FIELD (IMPORTANT)
+    extra_data = models.JSONField(default=dict)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.symbol} {self.timeframe} @ {self.created_at}"
+    
+    
     class Meta:
         ordering = ["-created_at"]

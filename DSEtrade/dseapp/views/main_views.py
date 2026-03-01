@@ -13,6 +13,12 @@ import requests
 import datetime
 import time
 from django.utils import timezone
+from ..models import Portfolio, Order
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from dseapp.models import Candle
 
 # 🏠 Home Page View
 def home(request):
@@ -246,7 +252,7 @@ def silver_history(request):
 @login_required
 def analysis(request):
     """Simple analysis page"""
-    from .models import Portfolio, Order
+  
     
     portfolio, _ = Portfolio.objects.get_or_create(id=1)
     orders = Order.objects.all()
@@ -261,11 +267,7 @@ def analysis(request):
     
     return render(request, 'analysis.html', context)
 
-# views.py
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from dseapp.models import Candle
 
 class CandleDataView(APIView):
 
