@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.utils import timezone
 from datetime import timedelta
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 from dseapp.signals.smc_engine import ProfessionalSMCEngine
 from dseapp.models import Candle, SignalLog
@@ -35,9 +37,13 @@ class CurrentSignalView(APIView):
         if timeframe not in self.VALID_TIMEFRAMES:
             timeframe = "15m"
 
+        # Ensure latest candle data
         self._ensure_fresh_data(symbol, timeframe)
+
+        # Run SMC Engine if new candle
         self._run_engine_if_new_candle(symbol, timeframe)
 
+        # Return latest signal
         return self._get_latest_signal(symbol, timeframe)
 
     # =============================================
@@ -95,9 +101,9 @@ class CurrentSignalView(APIView):
         if len(candles) < 50:
             return
 
-        # -------------------------------
-        # ENGINE RUN
-        # -------------------------------
+        # -----------------------------------
+        # RUN SMC ENGINE
+        # -----------------------------------
 
         engine = ProfessionalSMCEngine(
             candles_htf=candles,
@@ -107,9 +113,9 @@ class CurrentSignalView(APIView):
 
         results = engine.analyze_all()
 
-        # -------------------------------
-        # SAVE SINGLE ROW (JSON STORAGE)
-        # -------------------------------
+        # -----------------------------------
+        # SAVE RESULT AS JSON
+        # -----------------------------------
 
         SignalLog.objects.create(
             symbol=symbol,
@@ -122,15 +128,15 @@ class CurrentSignalView(APIView):
             take_profit_1=0,
             take_profit_2=0,
             take_profit_3=0,
-            extra_data={
+            extra_data=json.loads(json.dumps({
                 "scalp": results["scalp"].__dict__,
                 "institutional": results["institutional"].__dict__,
                 "hybrid": results["hybrid"].__dict__
-            }
+            }, cls=DjangoJSONEncoder))
         )
 
     # =============================================
-    # RETURN LATEST MULTI LAYER
+    # RETURN LATEST MULTI LAYER SIGNAL
     # =============================================
 
     def _get_latest_signal(self, symbol, timeframe):
