@@ -542,3 +542,106 @@ if __name__ == "__main__":
             print("\nExplanation:")
             for line in signal.explanation:
                 print(f"  {line}")
+
+
+                # ==================== BACKWARD COMPATIBILITY CLASS ====================
+
+class SMCSignalEngine:
+    """
+    Legacy SMC Signal Engine for backward compatibility
+    Simple version that works with single timeframe
+    """
+    
+    def __init__(self, candles: List[Dict]):
+        """
+        Initialize with candle data
+        
+        Args:
+            candles: List of candle dictionaries with 'open', 'high', 'low', 'close', 'time'
+        """
+        self.candles = candles or []
+
+    def analyze(self) -> Dict:
+        """
+        Simple SMC analysis for backward compatibility
+        
+        Returns:
+            Dictionary with signal, structure, and confidence
+        """
+        try:
+            from .structure import detect_structure
+            from .liquidity import detect_liquidity
+            from .breaker import detect_breaker
+            
+            if not self.candles or len(self.candles) < 10:
+                return {
+                    "signal": "INSUFFICIENT_DATA",
+                    "structure": "unknown",
+                    "confidence": 0
+                }
+            
+            # Detect various factors
+            structure = detect_structure(self.candles)
+            liquidity = detect_liquidity(self.candles)
+            breaker = detect_breaker(self.candles)
+            
+            confidence = 0
+            
+            # Structure weight (40%)
+            if structure in ["bullish", "bearish"]:
+                confidence += 40
+            
+            # Liquidity weight (30%)
+            if liquidity:
+                confidence += 30
+            
+            # Breaker weight (30%)
+            if breaker:
+                confidence += 30
+            
+            # Generate signal based on confidence
+            if confidence >= 70:
+                if structure == "bullish":
+                    signal = "BUY"
+                elif structure == "bearish":
+                    signal = "SELL"
+                else:
+                    signal = "NO_TRADE"
+            else:
+                signal = "NO_TRADE"
+            
+            return {
+                "signal": signal,
+                "structure": structure,
+                "confidence": confidence
+            }
+            
+        except Exception as e:
+            print(f"Legacy SMC Engine Error: {e}")
+            import traceback
+            traceback.print_exc()
+            return {
+                "signal": "ANALYSIS_ERROR",
+                "structure": "unknown",
+                "confidence": 0
+            }
+    
+    def get_entry_price(self) -> float:
+        """Get current entry price (last close)"""
+        if not self.candles:
+            return 0.0
+        return float(self.candles[-1].get('close', 0))
+    
+    def get_stop_loss(self) -> float:
+        """Simple stop loss calculation (2% away)"""
+        if not self.candles:
+            return 0.0
+        current = self.get_entry_price()
+        return current * 0.98  # 2% stop loss
+    
+    def get_take_profit(self) -> float:
+        """Simple take profit calculation (4% away)"""
+        if not self.candles:
+            return 0.0
+        current = self.get_entry_price()
+        return current * 1.04  # 4% take profit
