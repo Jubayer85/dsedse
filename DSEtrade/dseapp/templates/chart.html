@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMC INSTITUTIONAL • 3‑LAYER ENGINE</title>
-    <!-- Google Font & subtle icon library -->
+    <title>SMC Institutional • 3‑Layer Engine</title>
+    <!-- Google Font & Font Awesome -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <!-- Font Awesome 6 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
     * {
@@ -18,376 +17,328 @@
     }
 
     body {
-        background: radial-gradient(circle at 20% 30%, #0b101f, #03050c);
-        font-family: "Inter", system-ui, -apple-system, sans-serif;
+        background: linear-gradient(135deg, #0a0f1e 0%, #0d1428 100%);
+        font-family: 'Inter', sans-serif;
         min-height: 100vh;
+        color: #eef4ff;
+        padding: 20px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        color: #f0f4ff;
-        padding: 16px 20px;
     }
 
-    /* Glassmorphic top bar */
-    .top-bar {
+    /* Main Container */
+    .container {
+        max-width: 1600px;
         width: 100%;
-        max-width: 1440px;
-        background: rgba(18, 26, 40, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(78, 138, 255, 0.15);
-        border-radius: 60px;
-        padding: 14px 28px;
-        margin-bottom: 28px;
+        margin: 0 auto;
+    }
+
+    /* Header */
+    .top-bar {
+        background: rgba(18, 26, 40, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 30px;
+        padding: 20px 30px;
+        margin-bottom: 25px;
         display: flex;
-        align-items: center;
         justify-content: space-between;
+        align-items: center;
         flex-wrap: wrap;
         gap: 20px;
-        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(56, 189, 248, 0.2) inset;
+        box-shadow: 0 20px 35px -10px rgba(0,0,0,0.5);
+        width: 100%;
     }
 
     .logo {
-        font-weight: 700;
-        font-size: 1.35rem;
-        letter-spacing: -0.02em;
-        background: linear-gradient(120deg, #ffffff, #a6c9ff, #88b4ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
     }
+
     .logo i {
-        background: #1e3a5f;
-        padding: 8px;
-        border-radius: 50%;
-        color: #7ab7ff;
-        font-size: 1.1rem;
-        -webkit-text-fill-color: #7ab7ff;
-        box-shadow: 0 5px 12px #1e3a5f80;
+        font-size: 2rem;
+        color: #3b82f6;
+        background: rgba(59, 130, 246, 0.2);
+        padding: 12px;
+        border-radius: 18px;
+    }
+
+    .logo-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #fff, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .badge-premium {
+        color: #3b82f6;
+        font-size: 0.8rem;
+        background: rgba(59, 130, 246, 0.2);
+        padding: 4px 12px;
+        border-radius: 30px;
+        margin-left: 10px;
     }
 
     .selector {
         display: flex;
-        gap: 14px;
+        gap: 15px;
     }
-    .selector select {
-        background: rgba(8, 18, 32, 0.8);
+
+    select {
+        background: rgba(8, 18, 32, 0.9);
         border: 1px solid #2d3f60;
         border-radius: 40px;
-        padding: 10px 22px 10px 20px;
+        padding: 12px 25px;
         font-family: 'Inter', sans-serif;
         font-weight: 500;
-        font-size: 0.9rem;
-        color: #eef4ff;
-        backdrop-filter: blur(4px);
+        color: #fff;
         cursor: pointer;
         outline: none;
-        transition: all 0.2s;
+        min-width: 150px;
         appearance: none;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2399bbff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
         background-repeat: no-repeat;
-        background-position: right 12px center;
-        background-size: 16px;
-    }
-    .selector select:hover {
-        border-color: #4a80e5;
-        background-color: #0f1b30;
-        box-shadow: 0 0 15px #2f5bb7;
+        background-position: right 15px center;
     }
 
-    /* Main grid */
-    .dashboard-grid {
-        max-width: 1440px;
+    select:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 0 20px rgba(59,130,246,0.3);
+    }
+
+    /* Main Grid */
+    .container-grid {
         width: 100%;
         display: grid;
-        grid-template-columns: 340px 1fr;
-        gap: 24px;
+        grid-template-columns: 380px 1fr;
+        gap: 25px;
+        margin-bottom: 25px;
     }
 
-    /* Left panel cards */
-    .panel-left {
+    /* Left Panel */
+    .side {
         display: flex;
         flex-direction: column;
         gap: 20px;
     }
 
-    .glass-card {
-        background: rgba(16, 24, 40, 0.65);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(72, 120, 255, 0.2);
-        border-radius: 36px;
-        padding: 22px 20px;
-        box-shadow: 0 22px 35px -15px #000000cc, 0 0 0 1px rgba(112, 176, 255, 0.15) inset;
-        transition: transform 0.25s ease, border-color 0.2s;
-    }
-    .glass-card:hover {
-        border-color: #4c82f0;
-        transform: translateY(-3px);
-    }
-
-    .alignment {
-        background: rgba(12, 22, 40, 0.8);
-        backdrop-filter: blur(8px);
-        border-radius: 60px;
-        padding: 18px 24px;
-        font-weight: 600;
-        font-size: 1.1rem;
-        border: 1px solid #2c4875;
+    /* Alignment Card */
+    .alignment-card {
+        background: linear-gradient(145deg, #1a2639, #0f1a2f);
+        border: 1px solid #3b82f6;
+        border-radius: 30px;
+        padding: 25px;
         text-align: center;
-        letter-spacing: 0.3px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-        transition: all 0.2s;
+        box-shadow: 0 15px 35px -10px #3b82f6;
     }
 
-    .card-header {
+    .alignment-badge {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .alignment-time {
+        color: #94a3b8;
+        font-size: 0.8rem;
+    }
+
+    /* Signal Cards */
+    .card {
+        background: rgba(18, 26, 40, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(56, 189, 248, 0.15);
+        border-radius: 30px;
+        padding: 25px;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        border-color: #3b82f6;
+        transform: translateY(-3px);
+        box-shadow: 0 20px 30px -15px #3b82f6;
+    }
+
+    .card h4 {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 16px;
+        gap: 10px;
+        margin-bottom: 20px;
+        color: #94a3b8;
         font-size: 0.8rem;
         font-weight: 600;
+        letter-spacing: 1px;
         text-transform: uppercase;
-        letter-spacing: 0.6px;
-        color: #9bb3e0;
     }
-    .card-header i {
+
+    .card h4 i {
         font-size: 1.2rem;
-        background: linear-gradient(145deg, #254a7a, #142b4a);
-        padding: 6px;
-        border-radius: 14px;
-        color: #9bc0ff;
+        color: #3b82f6;
     }
 
     .signal {
-        font-weight: 700;
-        font-size: 1.4rem;
-        margin-bottom: 18px;
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 15px;
         display: flex;
         align-items: center;
         gap: 10px;
         flex-wrap: wrap;
     }
 
-    .sweep-badge {
-        background: #244362;
-        padding: 6px 14px;
-        border-radius: 40px;
-        font-size: 0.7rem;
+    .confidence-badge {
+        background: rgba(59, 130, 246, 0.2);
+        padding: 5px 15px;
+        border-radius: 30px;
+        font-size: 0.9rem;
         font-weight: 600;
-        color: #b5d0ff;
-        border: 1px solid #3f649e;
+        border: 1px solid currentColor;
+    }
+
+    .sweep-badge {
         display: inline-flex;
         align-items: center;
         gap: 4px;
+        background: rgba(234, 179, 8, 0.15);
+        padding: 5px 15px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        color: #facc15;
+        border: 1px solid #facc15;
     }
 
     .levels {
-        background: rgba(5, 12, 24, 0.7);
-        border-radius: 28px;
-        padding: 16px 18px;
-        font-size: 0.85rem;
-        line-height: 1.9;
-        border: 1px solid #2d3e60;
-        margin: 14px 0 10px;
-        backdrop-filter: blur(4px);
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 20px;
+        padding: 20px;
+        margin: 15px 0;
+        border: 1px solid #2d3f60;
+        font-size: 0.95rem;
+        line-height: 2;
+        color: #94a3b8;
     }
+
     .levels span {
-        color: #b8d2ff;
-        font-weight: 400;
+        color: #fff;
+        font-weight: 500;
         display: inline-block;
-        min-width: 65px;
+        min-width: 80px;
     }
 
     .meta {
         display: flex;
         justify-content: space-between;
-        font-size: 0.7rem;
-        color: #8ba5d0;
-        border-top: 1px dashed #2f4266;
-        padding-top: 12px;
-        margin-top: 6px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #2d3f60;
+        color: #94a3b8;
+        font-size: 0.8rem;
     }
 
-    .live-stats {
+    /* Live Stats Card */
+    .live-stats-card {
+        background: rgba(18, 26, 40, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(56, 189, 248, 0.15);
+        border-radius: 30px;
+        padding: 20px;
+    }
+
+    .stat-row {
         display: flex;
         justify-content: space-between;
-        font-size: 0.9rem;
-        font-weight: 500;
-        background: #0b1428;
-        padding: 16px 18px;
-        border-radius: 60px;
-        border: 1px solid #2e4570;
-        margin-top: 6px;
+        align-items: center;
+        padding: 10px 0;
     }
 
-    /* Chart panel */
-    .chart-panel {
-        background: rgba(10, 18, 32, 0.7);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(60, 120, 240, 0.35);
-        border-radius: 38px;
+    .price-large {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #3b82f6;
+    }
+
+    .timer-badge {
+        background: #1e293b;
+        padding: 8px 20px;
+        border-radius: 40px;
+        font-weight: 600;
+    }
+
+    /* Chart Panel */
+    .chart {
+        background: rgba(18, 26, 40, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 30px;
         overflow: hidden;
-        box-shadow: 0 30px 45px -20px #000, 0 0 0 1px #2b5088 inset;
-        display: flex;
-        flex-direction: column;
     }
 
     .chart-header {
-        padding: 16px 28px;
-        background: rgba(8, 16, 30, 0.7);
-        border-bottom: 1px solid #1f3960;
+        padding: 20px 25px;
+        border-bottom: 1px solid #2d3f60;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-weight: 500;
-        color: #c7dcff;
         font-size: 0.9rem;
-    }
-    #apiStatus {
-        background: #0e213c;
-        padding: 6px 18px;
-        border-radius: 40px;
-        font-size: 0.7rem;
-        font-weight: 600;
-        color: #7eb2ff;
-        border: 1px solid #3b6bb0;
-    }
-    #main_chart {
-        height: 580px;
-        width: 100%;
-        background: #030b16;
+        font-weight: 500;
+        color: #94a3b8;
     }
 
-    /* Email section */
-    .email-section {
-        margin-top: 24px;
-        max-width: 1440px;
+    #main_chart {
+        height: 600px;
         width: 100%;
-        background: rgba(18, 26, 40, 0.7);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(78, 138, 255, 0.15);
-        border-radius: 60px;
-        padding: 20px 28px;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
     }
-    
-    .email-input-group {
-        display: flex;
-        gap: 12px;
-        flex: 2;
-        min-width: 300px;
-    }
-    
-    .email-input {
-        flex: 1;
-        background: rgba(8, 18, 32, 0.8);
-        border: 1px solid #2d3f60;
-        border-radius: 60px;
-        padding: 14px 24px;
-        font-family: 'Inter', sans-serif;
-        color: white;
-        font-size: 0.95rem;
-        outline: none;
-    }
-    
-    .email-input:focus {
-        border-color: #4a80e5;
-        box-shadow: 0 0 0 3px rgba(74, 128, 229, 0.2);
-    }
-    
-    .btn-email {
-        background: linear-gradient(145deg, #1e3a5f, #0f2642);
-        border: 1px solid #3b6bb0;
-        color: white;
-        padding: 14px 32px;
-        border-radius: 60px;
+
+    /* Status Badge */
+    .status-badge {
+        background: #1e293b;
+        padding: 6px 18px;
+        border-radius: 40px;
+        font-size: 0.75rem;
         font-weight: 600;
-        font-size: 0.95rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        white-space: nowrap;
-    }
-    
-    .btn-email:hover {
-        background: linear-gradient(145deg, #264f82, #1a3460);
-        border-color: #5a8cff;
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px -5px #1e3f9e;
-    }
-    
-    .btn-email i {
-        font-size: 1.1rem;
-    }
-    
-    .email-status {
-        color: #7eb2ff;
-        font-size: 0.85rem;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 10px #22c55e;
+        display: inline-block;
     }
 
     .footer-note {
         margin-top: 30px;
         font-size: 0.7rem;
-        color: #47658f;
+        color: #64748b;
         text-align: center;
-        letter-spacing: 0.5px;
-        border-top: 1px solid #1f3450;
-        padding-top: 18px;
         width: 100%;
-        max-width: 1440px;
+        border-top: 1px solid #1f2a3a;
+        padding-top: 20px;
     }
 
-    .badge-live {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        background: #3eff9e;
-        border-radius: 50%;
-        box-shadow: 0 0 8px #2effa0;
-        margin-right: 6px;
+    /* TP/SL Colors */
+    .tp-price {
+        color: #22c55e;
+        font-weight: 600;
     }
-    
-    .timer-badge {
-        background: #1e314f;
-        border-radius: 40px;
-        padding: 4px 10px;
-        font-size: 0.7rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
+
+    .sl-price {
+        color: #ef4444;
+        font-weight: 600;
     }
-    
-    .toast-message {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: rgba(10, 30, 50, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid #4a80e5;
-        border-radius: 60px;
-        padding: 16px 28px;
-        color: white;
-        font-weight: 500;
-        transform: translateX(400px);
-        transition: transform 0.3s ease;
-        z-index: 9999;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-    }
-    
-    .toast-message.show {
-        transform: translateX(0);
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .container-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 </head>
@@ -395,8 +346,11 @@
 
 <div class="top-bar">
     <div class="logo">
-        <i class="fas fa-layer-group"></i> 
-        <span>SMC 3‑LAYER · INSTITUTIONAL</span>
+        <i class="fas fa-chart-line"></i>
+        <div>
+            <span class="logo-text">⚡ SMC · 3‑LAYER INSTITUTIONAL ENGINE</span>
+            <span class="badge-premium">LIVE</span>
+        </div>
     </div>
     <div class="selector">
         <select id="symbol">
@@ -417,350 +371,302 @@
     </div>
 </div>
 
-<div class="dashboard-grid">
-    <!-- LEFT SIDE : 3-layer cards + alignment -->
-    <div class="panel-left">
-        <div id="alignmentBox" class="alignment" style="background: rgba(12,28,50,0.8);">
-            <i class="fas fa-sync-alt fa-spin" style="margin-right: 8px;"></i> Alignment: SYNCHRONIZING
-        </div>
+<div class="container">
+    <div class="container-grid">
+        <div class="side">
+            <!-- Alignment Card (updated style) -->
+            <div class="alignment-card" id="alignmentBox">
+                <div class="alignment-badge">🔄 Alignment: Checking...</div>
+                <div class="alignment-time" id="alignmentTime"></div>
+            </div>
 
-        <!-- SCALP CARD -->
-        <div class="glass-card" id="scalpCard">
-            <div class="card-header"><i class="fas fa-bolt"></i> SCALP MODE · LTF DRIVEN</div>
-            <div id="scalp">
-                <div class="signal" style="color:#9bb8ff;">—</div>
-                <div class="levels">⏳ Awaiting signal</div>
+            <!-- SCALP MODE CARD -->
+            <div class="card">
+                <h4><i class="fas fa-bolt" style="color:#facc15"></i> SCALP MODE · LTF DRIVEN</h4>
+                <div id="scalp">
+                    <div class="signal" style="color:#94a3b8">
+                        <i class="fas fa-circle-notch fa-spin"></i> Loading...
+                    </div>
+                    <div class="levels">Waiting for signal...</div>
+                </div>
+            </div>
+
+            <!-- INSTITUTIONAL MODE CARD -->
+            <div class="card">
+                <h4><i class="fas fa-city" style="color:#3b82f6"></i> INSTITUTIONAL · HTF DOMINANT</h4>
+                <div id="institutional">
+                    <div class="signal" style="color:#94a3b8">
+                        <i class="fas fa-circle-notch fa-spin"></i> Loading...
+                    </div>
+                    <div class="levels">Waiting for signal...</div>
+                </div>
+            </div>
+
+            <!-- HYBRID MODE CARD -->
+            <div class="card">
+                <h4><i class="fas fa-merge" style="color:#22c55e"></i> HYBRID · FULL ALIGNMENT</h4>
+                <div id="hybrid">
+                    <div class="signal" style="color:#94a3b8">
+                        <i class="fas fa-circle-notch fa-spin"></i> Loading...
+                    </div>
+                    <div class="levels">Waiting for signal...</div>
+                </div>
+            </div>
+
+            <!-- LIVE STATS CARD -->
+            <div class="live-stats-card">
+                <div class="stat-row">
+                    <span><i class="fas fa-chart-line" style="color:#3b82f6"></i> Live price</span>
+                    <span class="price-large" id="livePrice">--</span>
+                </div>
+                <div class="stat-row">
+                    <span><i class="fas fa-clock"></i> Refresh in</span>
+                    <span class="timer-badge" id="timer">5s</span>
+                </div>
+                <div class="stat-row">
+                    <span><i class="fas fa-database"></i> Status</span>
+                    <span class="status-badge" id="apiStatus"><span class="status-dot"></span> live</span>
+                </div>
             </div>
         </div>
 
-        <!-- INSTITUTIONAL CARD -->
-        <div class="glass-card" id="instCard">
-            <div class="card-header"><i class="fas fa-city"></i> INSTITUTIONAL · HTF DOMINANT</div>
-            <div id="institutional">
-                <div class="signal" style="color:#9bb8ff;">—</div>
-                <div class="levels">⏳ Awaiting signal</div>
+        <!-- CHART -->
+        <div class="chart">
+            <div class="chart-header">
+                <span><i class="fas fa-chart-candlestick" style="color:#3b82f6"></i> <span id="chartTitle">Smart Money · order flow</span></span>
+                <span class="status-badge"><span class="status-dot"></span> connected</span>
             </div>
+            <div id="main_chart"></div>
         </div>
-
-        <!-- HYBRID CARD -->
-        <div class="glass-card" id="hybridCard">
-            <div class="card-header"><i class="fas fa-merge"></i> HYBRID · FULL ALIGNMENT</div>
-            <div id="hybrid">
-                <div class="signal" style="color:#9bb8ff;">—</div>
-                <div class="levels">⏳ Awaiting signal</div>
-            </div>
-        </div>
-
-        <!-- LIVE INFO -->
-        <div class="glass-card" style="padding: 16px 22px;">
-            <div class="live-stats">
-                <span><i class="fas fa-chart-line" style="color: #58a6ff;"></i> Live price</span>
-                <span id="livePrice" style="font-weight:700;">--</span>
-            </div>
-            <div class="live-stats" style="margin-top: 8px; background:#0f1b30;">
-                <span><i class="far fa-clock"></i> Refresh</span>
-                <span id="timer" class="timer-badge"><i class="fas fa-circle" style="color:#33ff99; font-size: 0.5rem;"></i> 5s</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- RIGHT CHART -->
-    <div class="chart-panel">
-        <div class="chart-header">
-            <span><i class="fas fa-chart-candlestick" style="margin-right: 10px;"></i> <span id="chartTitleSymbol">XAUUSD · 15m</span> · order flow</span>
-            <span id="apiStatus"><span class="badge-live"></span> streaming</span>
-        </div>
-        <div id="main_chart"></div>
-    </div>
-</div>
-
-<!-- EMAIL SECTION -->
-<div class="email-section">
-    <div class="email-input-group">
-        <input type="email" id="emailInput" class="email-input" placeholder="Enter your email address" value="trader@example.com">
-        <button class="btn-email" id="sendSignalBtn">
-            <i class="fas fa-envelope"></i> Send Signal
-        </button>
-    </div>
-    <div class="email-status" id="emailStatus">
-        <i class="fas fa-info-circle"></i> Click to send current signal
     </div>
 </div>
 
 <div class="footer-note">
-    ⚡ SMC 3‑layer engine · scalp · institutional · hybrid · real‑time alignment · Email alerts active
+    SMC 3‑layer engine · scalp · institutional · hybrid · v2.0
 </div>
 
-<!-- Toast notification -->
-<div id="toastMessage" class="toast-message">
-    <i class="fas fa-check-circle" style="color: #3eff9e; margin-right: 10px;"></i>
-    <span id="toastText">Signal sent successfully!</span>
-</div>
-
-<!-- TradingView library -->
+<!-- TradingView Library -->
 <script src="https://s3.tradingview.com/tv.js"></script>
+
 <script>
-(function() {
-    // CONFIG
-    const API_URL = "http://127.0.0.1:8000/api/signal/";
-    const EMAIL_API_URL = "send_signal.php"; // PHP script for sending email
-    const TV_SYMBOL = {
-        XAUUSD: "OANDA:XAUUSD",
-        EURUSD: "FX:EURUSD",
-        XAGUSD: "OANDA:XAGUSD",
-        BTCUSD: "COINBASE:BTCUSD"
-    };
+// ==================== CONFIG ====================
+const API_URL = "http://127.0.0.1:8000/api/signal/";
+let tvWidget = null;
+let timeLeft = 5;
+let currentSymbol = 'XAUUSD';
+let currentTF = '15m';
 
-    let tvWidget = null;
-    let timeLeft = 5;
-    let currentSymbol = "XAUUSD";
-    let currentTF = "15m";
-    let latestSignalData = null;
+// TradingView symbol mapping
+const TV_SYMBOL = {
+    XAUUSD: "OANDA:XAUUSD",
+    EURUSD: "FX:EURUSD",
+    XAGUSD: "OANDA:XAGUSD",
+    BTCUSD: "COINBASE:BTCUSD"
+};
 
-    // DOM elements
-    const symbolSelect = document.getElementById('symbol');
-    const tfSelect = document.getElementById('tf');
-    const alignmentBox = document.getElementById('alignmentBox');
-    const livePriceSpan = document.getElementById('livePrice');
-    const timerSpan = document.getElementById('timer');
-    const apiStatusSpan = document.getElementById('apiStatus');
-    const chartTitleSymbol = document.getElementById('chartTitleSymbol');
-    const sendSignalBtn = document.getElementById('sendSignalBtn');
-    const emailInput = document.getElementById('emailInput');
-    const emailStatus = document.getElementById('emailStatus');
-    const toastMessage = document.getElementById('toastMessage');
-    const toastText = document.getElementById('toastText');
+// ==================== HELPER FUNCTIONS ====================
+function formatPrice(price) {
+    if (price === undefined || price === null) return '--';
+    if (currentSymbol === 'BTCUSD') return price.toFixed(0);
+    if (currentSymbol === 'XAGUSD') return price.toFixed(3);
+    if (currentSymbol === 'EURUSD') return price.toFixed(5);
+    return price.toFixed(2);
+}
 
-    // Helper format
-    const formatPrice = (p) => (p && !isNaN(p)) ? Number(p).toFixed(2) : '—';
+function renderSignalCard(data, elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
 
-    // Show toast notification
-    function showToast(message, isSuccess = true) {
-        toastText.innerText = message;
-        toastMessage.style.borderColor = isSuccess ? '#3eff9e' : '#ff6b6b';
-        toastMessage.classList.add('show');
-        setTimeout(() => {
-            toastMessage.classList.remove('show');
-        }, 3000);
-    }
-
-    // Render signal inside a card
-    function renderSignalCard(containerId, data) {
-        const el = document.getElementById(containerId);
-        if (!el) return;
-        if (!data || data.signal === "NO_TRADE" || data.signal === "NEUTRAL" || data.signal?.includes("NO_TRADE")) {
-            el.innerHTML = `
-                <div class="signal" style="color:#92acdd;">⏸️ NO TRADE</div>
-                <div class="levels">structure: ${data?.structure || 'neutral'}<br>confidence: ${data?.confidence || 0}%</div>
-                <div class="meta"><span>⏺ waiting</span><span>⚡ 0%</span></div>
-            `;
-            return;
-        }
-
-        const isLong = data.direction === "LONG";
-        const color = isLong ? "#86efac" : "#fca5a5";
-        const arrow = isLong ? "▲" : "▼";
-        const badge = data.liquidity_swept ? `<span class="sweep-badge"><i class="fas fa-water"></i> sweep</span>` : '';
-
+    if (!data || data.signal === "NO_TRADE" || data.signal?.includes("NO_TRADE")) {
         el.innerHTML = `
-            <div class="signal" style="color:${color}">
-                ${arrow} ${data.signal} (${data.confidence}%) ${badge}
+            <div class="signal" style="color:#94a3b8">
+                <i class="fas fa-minus-circle"></i> NO TRADE
             </div>
             <div class="levels">
-                <span>Entry:</span> ${formatPrice(data.entry_price)}<br>
-                <span>Stop:</span> ${formatPrice(data.stop_loss)}<br>
-                <span>TP1 (1:2):</span> ${formatPrice(data.take_profit_1)}<br>
-                <span>TP2 (1:3):</span> ${formatPrice(data.take_profit_2)}<br>
-                <span>TP3 (1:5):</span> ${formatPrice(data.take_profit_3)}
+                <span>Structure:</span> ${data?.structure || 'neutral'}<br>
+                <span>Confidence:</span> ${data?.confidence || 0}%
             </div>
             <div class="meta">
-                <span>${data.structure || '—'}</span>
-                <span><i class="fas fa-bolt"></i> ${data.confidence || 0}%</span>
+                <span>⏳ Waiting</span>
+                <span>⚡ 0%</span>
             </div>
         `;
+        return;
     }
 
-    // ALIGNMENT style with modern messaging
-    function updateAlignmentBox(data) {
-        if (!alignmentBox) return;
-        const scalpDir = data.scalp?.direction;
-        const instDir = data.institutional?.direction;
-        const hybridDir = data.hybrid?.direction;
+    const isLong = data.direction === "LONG";
+    const color = isLong ? "#22c55e" : "#ef4444";
+    const arrow = isLong ? "▲" : "▼";
+    const signalText = isLong ? "BUY" : "SELL";
 
-        if (scalpDir && instDir && hybridDir && scalpDir === instDir && instDir === hybridDir && 
-            !["NO_TRADE", "NEUTRAL"].includes(scalpDir)) {
-            alignmentBox.style.background = "rgba(6, 58, 38, 0.8)";
-            alignmentBox.style.color = "#b0ffcf";
-            alignmentBox.style.borderColor = "#26e6a5";
-            alignmentBox.innerHTML = `<i class="fas fa-check-circle" style="color:#60ffb0;"></i> FULL ALIGNMENT · ${scalpDir}`;
-        } else if (hybridDir && !["NO_TRADE", "NEUTRAL"].includes(hybridDir)) {
-            alignmentBox.style.background = "rgba(65, 50, 20, 0.8)";
-            alignmentBox.style.color = "#fcd34d";
-            alignmentBox.style.borderColor = "#fbbf24";
-            alignmentBox.innerHTML = `<i class="fas fa-exclamation-triangle"></i> PARTIAL · hybrid: ${hybridDir}`;
-        } else {
-            alignmentBox.style.background = "rgba(25, 35, 55, 0.9)";
-            alignmentBox.style.color = "#9fb3db";
-            alignmentBox.style.borderColor = "#415e97";
-            alignmentBox.innerHTML = `<i class="fas fa-minus-circle"></i> NO ALIGNMENT · analyzing`;
-        }
+    let sweepHtml = data.liquidity_swept ? '<span class="sweep-badge"><i class="fas fa-water"></i> sweep</span>' : '';
+
+    el.innerHTML = `
+        <div class="signal" style="color:${color}">
+            ${arrow} ${signalText} (${data.confidence}%)
+            <span class="confidence-badge" style="border-color:${color}; color:${color}">${data.confidence}%</span>
+            ${sweepHtml}
+        </div>
+        <div class="levels">
+            <div><span>Entry:</span> ${formatPrice(data.entry_price)}</div>
+            <div><span>Stop loss:</span> <span class="sl-price">${formatPrice(data.stop_loss)}</span></div>
+            <div><span>TP1 (1:2):</span> <span class="tp-price">${formatPrice(data.take_profit_1)}</span></div>
+            <div><span>TP2 (1:3):</span> <span class="tp-price">${formatPrice(data.take_profit_2)}</span></div>
+            <div><span>TP3 (1:5):</span> <span class="tp-price">${formatPrice(data.take_profit_3)}</span></div>
+        </div>
+        <div class="meta">
+            <span><i class="fas fa-chart-line"></i> ${data.structure || '—'}</span>
+            <span><i class="fas fa-bolt"></i> ${data.confidence || 0}%</span>
+        </div>
+    `;
+}
+
+function updateAlignment(data) {
+    const box = document.getElementById("alignmentBox");
+    const timeEl = document.getElementById("alignmentTime");
+    if (!box) return;
+
+    const scalpDir = data.scalp?.direction;
+    const instDir = data.institutional?.direction;
+    const hybridDir = data.hybrid?.direction;
+
+    // Update time
+    if (timeEl) {
+        timeEl.innerText = `Last updated: ${new Date().toLocaleTimeString()}`;
     }
 
-    // Load TradingView chart
-    function loadChart(symbol, tf) {
-        if (tvWidget) {
-            try { tvWidget.remove(); } catch(e) { console.warn(e); }
-            document.getElementById("main_chart").innerHTML = "";
-        }
-        const intervalMap = { '1m':'1','5m':'5','15m':'15','30m':'30','1h':'60','4h':'240','1d':'D' };
-        tvWidget = new TradingView.widget({
-            width: "100%",
-            height: "100%",
-            symbol: TV_SYMBOL[symbol],
-            interval: intervalMap[tf] || '15',
-            timezone: "Asia/Dhaka",
-            theme: "dark",
-            style: "1",
-            container_id: "main_chart",
-            locale: "en",
-            toolbar_bg: "#0a0f1c",
-            hide_side_toolbar: false,
-            studies: ["MACD@tv-basicstudies", "RSI@tv-basicstudies"]
-        });
-        chartTitleSymbol.innerText = `${symbol} · ${tf}`;
+    // FULL ALIGNMENT : all three same and not NO_TRADE
+    if (scalpDir && instDir && hybridDir &&
+        scalpDir === instDir && instDir === hybridDir &&
+        scalpDir !== "NO_TRADE" && scalpDir !== "NEUTRAL") {
+        box.style.background = "linear-gradient(145deg, #065f46, #0f1a2f)";
+        box.style.borderColor = "#22c55e";
+        box.querySelector('.alignment-badge').innerHTML = `<i class="fas fa-check-circle" style="color:#22c55e"></i> FULL ALIGNMENT · ${scalpDir}`;
+        return;
     }
 
-    // FETCH signals
-    async function fetchSignals(symbol, tf, skipChartReload = true) {
-        try {
-            const url = `${API_URL}?symbol=${symbol}&tf=${tf}`;
-            console.log("API call", url);
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`status ${response.status}`);
-            const data = await response.json();
-            
-            // Store latest signal data for email
-            latestSignalData = data;
-
-            // update live price if exists
-            if (data.hybrid?.entry_price) {
-                livePriceSpan.innerText = formatPrice(data.hybrid.entry_price);
-            }
-
-            renderSignalCard("scalp", data.scalp);
-            renderSignalCard("institutional", data.institutional);
-            renderSignalCard("hybrid", data.hybrid);
-            updateAlignmentBox(data);
-
-            apiStatusSpan.innerHTML = `<span class="badge-live"></span> live · ${new Date().toLocaleTimeString([], {minute:'2-digit', second:'2-digit'})}`;
-        } catch (err) {
-            console.warn("API error, using fallback visuals", err);
-            apiStatusSpan.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#fbbf24;"></i> offline · retry`;
-        }
+    // HYBRID gives direction (usually strongest)
+    if (hybridDir && hybridDir !== "NO_TRADE" && hybridDir !== "NEUTRAL") {
+        box.style.background = "linear-gradient(145deg, #854d0e, #0f1a2f)";
+        box.style.borderColor = "#facc15";
+        box.querySelector('.alignment-badge').innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#facc15"></i> PARTIAL · Hybrid: ${hybridDir}`;
+        return;
     }
 
-    // SEND EMAIL with signal
-    async function sendSignalEmail() {
-        const email = emailInput.value.trim();
-        if (!email || !email.includes('@')) {
-            showToast('Please enter a valid email address', false);
-            return;
-        }
+    // default
+    box.style.background = "linear-gradient(145deg, #1e293b, #0f1a2f)";
+    box.style.borderColor = "#475569";
+    box.querySelector('.alignment-badge').innerHTML = `⚪ NO ALIGNMENT · analyzing`;
+}
 
-        if (!latestSignalData) {
-            showToast('No signal data available yet', false);
-            return;
-        }
-
-        // Update status
-        emailStatus.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending...`;
-        
-        try {
-            // Prepare signal data for email
-            const signalInfo = {
-                email: email,
-                symbol: symbolSelect.value,
-                timeframe: tfSelect.value,
-                timestamp: new Date().toISOString(),
-                scalp: latestSignalData.scalp,
-                institutional: latestSignalData.institutional,
-                hybrid: latestSignalData.hybrid,
-                alignment: document.getElementById('alignmentBox').innerText
-            };
-
-            // Send to PHP backend
-            const response = await fetch(EMAIL_API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(signalInfo)
-            });
-
-            const result = await response.json();
-            
-            if (result.success) {
-                showToast('Signal sent to your email!', true);
-                emailStatus.innerHTML = `<i class="fas fa-check-circle" style="color:#3eff9e;"></i> Sent at ${new Date().toLocaleTimeString()}`;
-            } else {
-                throw new Error(result.message || 'Failed to send email');
-            }
-        } catch (err) {
-            console.error('Email error:', err);
-            showToast('Failed to send email. Check console.', false);
-            emailStatus.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ff6b6b;"></i> Failed to send`;
-        }
+function loadChart(symbol, tf) {
+    if (tvWidget) {
+        try { tvWidget.remove(); } catch { }
+        document.getElementById("main_chart").innerHTML = "";
     }
 
-    // Periodic update (only signals, not chart)
-    function refreshData() {
-        const sym = symbolSelect.value;
-        const tf = tfSelect.value;
-        fetchSignals(sym, tf, true);
-    }
+    // convert django timeframe to TradingView interval
+    const intervalMap = {
+        '1m': '1', '5m': '5', '15m': '15', '30m': '30',
+        '1h': '60', '4h': '240', '1d': 'D'
+    };
 
-    // Full update (chart + data)
-    function fullDashboardUpdate() {
-        const sym = symbolSelect.value;
-        const tf = tfSelect.value;
-        currentSymbol = sym;
-        currentTF = tf;
-        loadChart(sym, tf);
-        fetchSignals(sym, tf);
+    tvWidget = new TradingView.widget({
+        width: "100%",
+        height: "100%",
+        symbol: TV_SYMBOL[symbol],
+        interval: intervalMap[tf] || '15',
+        timezone: "Asia/Dhaka",
+        theme: "dark",
+        style: "1",
+        container_id: "main_chart",
+        locale: "en",
+        toolbar_bg: "#0f172a",
+        enable_publishing: false,
+        hide_side_toolbar: false,
+        studies: ["MACD@tv-basicstudies", "RSI@tv-basicstudies"]
+    });
+
+    document.getElementById("chartTitle").innerHTML = `${symbol} · ${tf} · Smart Money Concepts`;
+}
+
+// ==================== MAIN FETCH ====================
+async function fetchSignals() {
+    const symbol = document.getElementById("symbol").value;
+    const tf = document.getElementById("tf").value;
+
+    try {
+        const url = `${API_URL}?symbol=${symbol}&tf=${tf}`;
+        console.log("Fetching:", url);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+
+        // display live price if available
+        if (data.hybrid?.entry_price) {
+            document.getElementById("livePrice").innerText = formatPrice(data.hybrid.entry_price);
+        }
+
+        // render cards
+        renderSignalCard(data.scalp, "scalp");
+        renderSignalCard(data.institutional, "institutional");
+        renderSignalCard(data.hybrid, "hybrid");
+
+        // alignment box
+        updateAlignment(data);
+
+        document.getElementById("apiStatus").innerHTML = '<span class="status-dot"></span> live';
+    } catch (err) {
+        console.error("API error", err);
+        document.getElementById("apiStatus").innerHTML = '<span class="status-dot" style="background:#ef4444"></span> offline';
+
+        // fallback – keep previous data
+        // Use mock data as fallback
+        const mockPrice = 2150.50 + (Math.random() - 0.5) * 10;
+        document.getElementById("livePrice").innerText = formatPrice(mockPrice);
+    }
+}
+
+// ==================== DASHBOARD UPDATE ====================
+function updateDashboard() {
+    const symbol = document.getElementById("symbol").value;
+    const tf = document.getElementById("tf").value;
+    
+    currentSymbol = symbol;
+    currentTF = tf;
+
+    loadChart(symbol, tf);
+    fetchSignals();
+
+    timeLeft = 5;
+    document.getElementById("timer").innerText = timeLeft + "s";
+}
+
+// ==================== TIMER ====================
+setInterval(() => {
+    timeLeft--;
+    if (timeLeft <= 0) {
+        fetchSignals();      // only refresh data, keep chart
         timeLeft = 5;
-        timerSpan.innerHTML = `<i class="fas fa-circle" style="color:#33ff99; font-size: 0.5rem;"></i> 5s`;
     }
+    document.getElementById("timer").innerText = timeLeft + "s";
+}, 1000);
 
-    // Timer countdown
-    setInterval(() => {
-        timeLeft -= 1;
-        if (timeLeft <= 0) {
-            refreshData();          // only fetch new signals, keep chart
-            timeLeft = 5;
-        }
-        timerSpan.innerHTML = `<i class="fas fa-circle" style="color:#33ff99; font-size: 0.5rem;"></i> ${timeLeft}s`;
-    }, 1000);
+// ==================== EVENT LISTENERS ====================
+document.getElementById("symbol").addEventListener("change", updateDashboard);
+document.getElementById("tf").addEventListener("change", updateDashboard);
 
-    // Event listeners
-    symbolSelect.addEventListener('change', fullDashboardUpdate);
-    tfSelect.addEventListener('change', fullDashboardUpdate);
-    sendSignalBtn.addEventListener('click', sendSignalEmail);
+// ==================== START ====================
+updateDashboard();
 
-    // start
-    fullDashboardUpdate();
-
-    // minor: update chart title on manual change if needed (but fullDashboardUpdate does)
-})();
+// Add alignment time update
+setInterval(() => {
+    const timeEl = document.getElementById("alignmentTime");
+    if (timeEl) {
+        timeEl.innerText = `Last updated: ${new Date().toLocaleTimeString()}`;
+    }
+}, 1000);
 </script>
 
-<!-- extra safe style for dynamic badges -->
-<style>
-    .glass-card .levels span { color: #c3dcff; font-weight: 500; }
-    #alignmentBox i { margin-right: 8px; }
-    .timer-badge i { margin-right: 4px; }
-    .badge-live { animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } }
-    .sweep-badge i { margin-right: 4px; }
-</style>
 </body>
 </html>
