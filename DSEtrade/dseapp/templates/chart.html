@@ -1,189 +1,403 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMC Institutional • 3‑Layer Engine</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMC INSTITUTIONAL • 3‑LAYER ENGINE</title>
+    <!-- Google Font & subtle icon library -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-:root{
-    --bg:#0f172a;
-    --card:#1e293b;
-    --border:#334155;
-    --text:#e2e8f0;
-    --dim:#94a3b8;
-    --green:#22c55e;
-    --red:#ef4444;
-    --yellow:#facc15;
-    --blue:#3b82f6;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-*{box-sizing:border-box;margin:0;padding:0}
+    body {
+        background: radial-gradient(circle at 20% 30%, #0b101f, #03050c);
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #f0f4ff;
+        padding: 16px 20px;
+    }
 
-body{
-    font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-}
+    /* Glassmorphic top bar */
+    .top-bar {
+        width: 100%;
+        max-width: 1440px;
+        background: rgba(18, 26, 40, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(78, 138, 255, 0.15);
+        border-radius: 60px;
+        padding: 14px 28px;
+        margin-bottom: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(56, 189, 248, 0.2) inset;
+    }
 
-.top-bar{
-    background:var(--card);
-    padding:15px 40px;
-    width:100%;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    border-bottom:1px solid var(--border);
-    flex-wrap:wrap;
-    gap:15px;
-}
+    .logo {
+        font-weight: 700;
+        font-size: 1.35rem;
+        letter-spacing: -0.02em;
+        background: linear-gradient(120deg, #ffffff, #a6c9ff, #88b4ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .logo i {
+        background: #1e3a5f;
+        padding: 8px;
+        border-radius: 50%;
+        color: #7ab7ff;
+        font-size: 1.1rem;
+        -webkit-text-fill-color: #7ab7ff;
+        box-shadow: 0 5px 12px #1e3a5f80;
+    }
 
-.logo{
-    font-weight:800;
-    font-size:1.3rem;
-    background:linear-gradient(135deg, #fff, #94a3b8);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-}
+    .selector {
+        display: flex;
+        gap: 14px;
+    }
+    .selector select {
+        background: rgba(8, 18, 32, 0.8);
+        border: 1px solid #2d3f60;
+        border-radius: 40px;
+        padding: 10px 22px 10px 20px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: #eef4ff;
+        backdrop-filter: blur(4px);
+        cursor: pointer;
+        outline: none;
+        transition: all 0.2s;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2399bbff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+    }
+    .selector select:hover {
+        border-color: #4a80e5;
+        background-color: #0f1b30;
+        box-shadow: 0 0 15px #2f5bb7;
+    }
 
-.selector{
-    display:flex;
-    gap:20px;
-}
+    /* Main grid */
+    .dashboard-grid {
+        max-width: 1440px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 24px;
+    }
 
-select{
-    background:var(--bg);
-    color:var(--text);
-    border:1px solid var(--border);
-    padding:8px 16px;
-    border-radius:8px;
-    font-size:0.95rem;
-    cursor:pointer;
-    outline:none;
-}
-select:hover{border-color:var(--blue);}
+    /* Left panel cards */
+    .panel-left {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
 
-.container{
-    width:95%;
-    max-width:1400px;
-    margin:25px auto;
-    display:grid;
-    grid-template-columns:320px 1fr;
-    gap:25px;
-}
+    .glass-card {
+        background: rgba(16, 24, 40, 0.65);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(72, 120, 255, 0.2);
+        border-radius: 36px;
+        padding: 22px 20px;
+        box-shadow: 0 22px 35px -15px #000000cc, 0 0 0 1px rgba(112, 176, 255, 0.15) inset;
+        transition: transform 0.25s ease, border-color 0.2s;
+    }
+    .glass-card:hover {
+        border-color: #4c82f0;
+        transform: translateY(-3px);
+    }
 
-.side{
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-}
+    .alignment {
+        background: rgba(12, 22, 40, 0.8);
+        backdrop-filter: blur(8px);
+        border-radius: 60px;
+        padding: 18px 24px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        border: 1px solid #2c4875;
+        text-align: center;
+        letter-spacing: 0.3px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        transition: all 0.2s;
+    }
 
-.card{
-    background:var(--card);
-    padding:18px;
-    border-radius:14px;
-    border:1px solid var(--border);
-    transition:0.2s;
-}
-.card:hover{border-color:#4b5a75;}
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #9bb3e0;
+    }
+    .card-header i {
+        font-size: 1.2rem;
+        background: linear-gradient(145deg, #254a7a, #142b4a);
+        padding: 6px;
+        border-radius: 14px;
+        color: #9bc0ff;
+    }
 
-.card h4{
-    margin:0 0 12px 0;
-    font-size:0.8rem;
-    font-weight:600;
-    letter-spacing:0.5px;
-    color:var(--dim);
-    text-transform:uppercase;
-    display:flex;
-    align-items:center;
-    gap:6px;
-}
-.card h4 i{font-size:1rem;}
+    .signal {
+        font-weight: 700;
+        font-size: 1.4rem;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
 
-.signal{
-    font-weight:700;
-    font-size:1.2rem;
-    margin-bottom:12px;
-}
+    .sweep-badge {
+        background: #244362;
+        padding: 6px 14px;
+        border-radius: 40px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #b5d0ff;
+        border: 1px solid #3f649e;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
 
-.levels{
-    font-size:0.85rem;
-    line-height:1.8;
-    color:var(--dim);
-    background:#0f172a50;
-    padding:10px;
-    border-radius:8px;
-}
-.levels span{color:var(--text);font-weight:500;}
+    .levels {
+        background: rgba(5, 12, 24, 0.7);
+        border-radius: 28px;
+        padding: 16px 18px;
+        font-size: 0.85rem;
+        line-height: 1.9;
+        border: 1px solid #2d3e60;
+        margin: 14px 0 10px;
+        backdrop-filter: blur(4px);
+    }
+    .levels span {
+        color: #b8d2ff;
+        font-weight: 400;
+        display: inline-block;
+        min-width: 65px;
+    }
 
-.meta{
-    margin-top:12px;
-    font-size:0.75rem;
-    display:flex;
-    justify-content:space-between;
-    color:var(--dim);
-}
+    .meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: #8ba5d0;
+        border-top: 1px dashed #2f4266;
+        padding-top: 12px;
+        margin-top: 6px;
+    }
 
-.chart{
-    background:var(--card);
-    border-radius:14px;
-    border:1px solid var(--border);
-    overflow:hidden;
-}
+    .live-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        font-weight: 500;
+        background: #0b1428;
+        padding: 16px 18px;
+        border-radius: 60px;
+        border: 1px solid #2e4570;
+        margin-top: 6px;
+    }
 
-.chart-header{
-    padding:14px 18px;
-    font-size:0.9rem;
-    font-weight:500;
-    color:var(--dim);
-    border-bottom:1px solid var(--border);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
+    /* Chart panel */
+    .chart-panel {
+        background: rgba(10, 18, 32, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(60, 120, 240, 0.35);
+        border-radius: 38px;
+        overflow: hidden;
+        box-shadow: 0 30px 45px -20px #000, 0 0 0 1px #2b5088 inset;
+        display: flex;
+        flex-direction: column;
+    }
 
-#main_chart{height:600px;}
+    .chart-header {
+        padding: 16px 28px;
+        background: rgba(8, 16, 30, 0.7);
+        border-bottom: 1px solid #1f3960;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 500;
+        color: #c7dcff;
+        font-size: 0.9rem;
+    }
+    #apiStatus {
+        background: #0e213c;
+        padding: 6px 18px;
+        border-radius: 40px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #7eb2ff;
+        border: 1px solid #3b6bb0;
+    }
+    #main_chart {
+        height: 580px;
+        width: 100%;
+        background: #030b16;
+    }
 
-.alignment{
-    text-align:center;
-    font-weight:700;
-    padding:14px;
-    border-radius:40px;
-    margin-bottom:5px;
-    background:#1e2a3a;
-    border:1px solid var(--border);
-    font-size:0.95rem;
-    letter-spacing:0.5px;
-}
+    /* Email section */
+    .email-section {
+        margin-top: 24px;
+        max-width: 1440px;
+        width: 100%;
+        background: rgba(18, 26, 40, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(78, 138, 255, 0.15);
+        border-radius: 60px;
+        padding: 20px 28px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+    }
+    
+    .email-input-group {
+        display: flex;
+        gap: 12px;
+        flex: 2;
+        min-width: 300px;
+    }
+    
+    .email-input {
+        flex: 1;
+        background: rgba(8, 18, 32, 0.8);
+        border: 1px solid #2d3f60;
+        border-radius: 60px;
+        padding: 14px 24px;
+        font-family: 'Inter', sans-serif;
+        color: white;
+        font-size: 0.95rem;
+        outline: none;
+    }
+    
+    .email-input:focus {
+        border-color: #4a80e5;
+        box-shadow: 0 0 0 3px rgba(74, 128, 229, 0.2);
+    }
+    
+    .btn-email {
+        background: linear-gradient(145deg, #1e3a5f, #0f2642);
+        border: 1px solid #3b6bb0;
+        color: white;
+        padding: 14px 32px;
+        border-radius: 60px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        white-space: nowrap;
+    }
+    
+    .btn-email:hover {
+        background: linear-gradient(145deg, #264f82, #1a3460);
+        border-color: #5a8cff;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px #1e3f9e;
+    }
+    
+    .btn-email i {
+        font-size: 1.1rem;
+    }
+    
+    .email-status {
+        color: #7eb2ff;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
-.sweep-badge{
-    display:inline-block;
-    background:#2d3a4f;
-    padding:2px 10px;
-    border-radius:20px;
-    font-size:0.7rem;
-    color:var(--dim);
-    margin-left:8px;
-}
+    .footer-note {
+        margin-top: 30px;
+        font-size: 0.7rem;
+        color: #47658f;
+        text-align: center;
+        letter-spacing: 0.5px;
+        border-top: 1px solid #1f3450;
+        padding-top: 18px;
+        width: 100%;
+        max-width: 1440px;
+    }
 
-.footer-note{
-    margin-top:10px;
-    font-size:0.7rem;
-    color:var(--dim);
-    text-align:center;
-    width:100%;
-}
+    .badge-live {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #3eff9e;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #2effa0;
+        margin-right: 6px;
+    }
+    
+    .timer-badge {
+        background: #1e314f;
+        border-radius: 40px;
+        padding: 4px 10px;
+        font-size: 0.7rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .toast-message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(10, 30, 50, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid #4a80e5;
+        border-radius: 60px;
+        padding: 16px 28px;
+        color: white;
+        font-weight: 500;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        z-index: 9999;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    }
+    
+    .toast-message.show {
+        transform: translateX(0);
+    }
 </style>
 </head>
-
 <body>
 
 <div class="top-bar">
-    <div class="logo">⚡ SMC · 3‑LAYER INSTITUTIONAL ENGINE</div>
+    <div class="logo">
+        <i class="fas fa-layer-group"></i> 
+        <span>SMC 3‑LAYER · INSTITUTIONAL</span>
+    </div>
     <div class="selector">
         <select id="symbol">
             <option value="XAUUSD" selected>XAUUSD (Gold)</option>
@@ -203,255 +417,350 @@ select:hover{border-color:var(--blue);}
     </div>
 </div>
 
-<div class="container">
+<div class="dashboard-grid">
+    <!-- LEFT SIDE : 3-layer cards + alignment -->
+    <div class="panel-left">
+        <div id="alignmentBox" class="alignment" style="background: rgba(12,28,50,0.8);">
+            <i class="fas fa-sync-alt fa-spin" style="margin-right: 8px;"></i> Alignment: SYNCHRONIZING
+        </div>
 
-<div class="side">
+        <!-- SCALP CARD -->
+        <div class="glass-card" id="scalpCard">
+            <div class="card-header"><i class="fas fa-bolt"></i> SCALP MODE · LTF DRIVEN</div>
+            <div id="scalp">
+                <div class="signal" style="color:#9bb8ff;">—</div>
+                <div class="levels">⏳ Awaiting signal</div>
+            </div>
+        </div>
 
-<div id="alignmentBox" class="alignment">
-    🔄 Alignment: Checking...
-</div>
+        <!-- INSTITUTIONAL CARD -->
+        <div class="glass-card" id="instCard">
+            <div class="card-header"><i class="fas fa-city"></i> INSTITUTIONAL · HTF DOMINANT</div>
+            <div id="institutional">
+                <div class="signal" style="color:#9bb8ff;">—</div>
+                <div class="levels">⏳ Awaiting signal</div>
+            </div>
+        </div>
 
-<div class="card">
-    <h4><span style="color:#facc15">⚡</span> SCALP MODE · LTF DRIVEN</h4>
-    <div id="scalp">
-        <div class="signal" style="color:var(--dim)">—</div>
-        <div class="levels">Waiting for signal…</div>
+        <!-- HYBRID CARD -->
+        <div class="glass-card" id="hybridCard">
+            <div class="card-header"><i class="fas fa-merge"></i> HYBRID · FULL ALIGNMENT</div>
+            <div id="hybrid">
+                <div class="signal" style="color:#9bb8ff;">—</div>
+                <div class="levels">⏳ Awaiting signal</div>
+            </div>
+        </div>
+
+        <!-- LIVE INFO -->
+        <div class="glass-card" style="padding: 16px 22px;">
+            <div class="live-stats">
+                <span><i class="fas fa-chart-line" style="color: #58a6ff;"></i> Live price</span>
+                <span id="livePrice" style="font-weight:700;">--</span>
+            </div>
+            <div class="live-stats" style="margin-top: 8px; background:#0f1b30;">
+                <span><i class="far fa-clock"></i> Refresh</span>
+                <span id="timer" class="timer-badge"><i class="fas fa-circle" style="color:#33ff99; font-size: 0.5rem;"></i> 5s</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT CHART -->
+    <div class="chart-panel">
+        <div class="chart-header">
+            <span><i class="fas fa-chart-candlestick" style="margin-right: 10px;"></i> <span id="chartTitleSymbol">XAUUSD · 15m</span> · order flow</span>
+            <span id="apiStatus"><span class="badge-live"></span> streaming</span>
+        </div>
+        <div id="main_chart"></div>
     </div>
 </div>
 
-<div class="card">
-    <h4><span style="color:#3b82f6">🏦</span> INSTITUTIONAL · HTF DOMINANT</h4>
-    <div id="institutional">
-        <div class="signal" style="color:var(--dim)">—</div>
-        <div class="levels">Waiting for signal…</div>
+<!-- EMAIL SECTION -->
+<div class="email-section">
+    <div class="email-input-group">
+        <input type="email" id="emailInput" class="email-input" placeholder="Enter your email address" value="trader@example.com">
+        <button class="btn-email" id="sendSignalBtn">
+            <i class="fas fa-envelope"></i> Send Signal
+        </button>
     </div>
-</div>
-
-<div class="card">
-    <h4><span style="color:#22c55e">🔄</span> HYBRID · FULL ALIGNMENT</h4>
-    <div id="hybrid">
-        <div class="signal" style="color:var(--dim)">—</div>
-        <div class="levels">Waiting for signal…</div>
+    <div class="email-status" id="emailStatus">
+        <i class="fas fa-info-circle"></i> Click to send current signal
     </div>
-</div>
-
-<div class="card" style="padding:12px 18px">
-    <div style="display:flex; justify-content:space-between; font-size:0.8rem">
-        <span>📊 Live price</span>
-        <span id="livePrice">--</span>
-    </div>
-    <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-top:6px">
-        <span>⏱️ Refresh in</span>
-        <span id="timer">5s</span>
-    </div>
-</div>
-
-</div>
-
-<div class="chart">
-    <div class="chart-header" id="chartTitle">
-        <span>📈 Smart Money · order flow</span>
-        <span id="apiStatus" style="font-size:0.7rem; background:#1e2a3a; padding:4px 12px; border-radius:40px;">⚡ live</span>
-    </div>
-    <div id="main_chart"></div>
-</div>
-
 </div>
 
 <div class="footer-note">
-    SMC 3‑layer engine · scalp · institutional · hybrid
+    ⚡ SMC 3‑layer engine · scalp · institutional · hybrid · real‑time alignment · Email alerts active
 </div>
 
+<!-- Toast notification -->
+<div id="toastMessage" class="toast-message">
+    <i class="fas fa-check-circle" style="color: #3eff9e; margin-right: 10px;"></i>
+    <span id="toastText">Signal sent successfully!</span>
+</div>
+
+<!-- TradingView library -->
 <script src="https://s3.tradingview.com/tv.js"></script>
-
 <script>
-// ==================== CONFIG ====================
-const API_URL = "http://127.0.0.1:8000/api/signal/";
-let tvWidget = null;
-let timeLeft = 5;
-
-// TradingView symbol mapping
-const TV_SYMBOL = {
-    XAUUSD: "OANDA:XAUUSD",
-    EURUSD: "FX:EURUSD",
-    XAGUSD: "OANDA:XAGUSD",
-    BTCUSD: "COINBASE:BTCUSD"
-};
-
-// ==================== HELPER FUNCTIONS ====================
-function formatPrice(price) {
-    return price?.toFixed?.(2) ?? (price ? Number(price).toFixed(2) : '--');
-}
-
-function renderSignalCard(data, elementId) {
-    const el = document.getElementById(elementId);
-    if (!el) return;
-
-    if (!data || data.signal === "NO_TRADE" || data.signal?.includes("NO_TRADE")) {
-        el.innerHTML = `
-            <div class="signal" style="color:var(--dim)">⏳ NO TRADE</div>
-            <div class="levels">Structure: ${data?.structure || 'neutral'}<br>Confidence: ${data?.confidence || 0}%</div>
-        `;
-        return;
-    }
-
-    const isLong = data.direction === "LONG";
-    const color = isLong ? "var(--green)" : "var(--red)";
-    const arrow = isLong ? "▲" : "▼";
-
-    let sweepHtml = data.liquidity_swept ? '<span class="sweep-badge">💧 sweep</span>' : '';
-
-    el.innerHTML = `
-        <div class="signal" style="color:${color}">
-            ${arrow} ${data.signal} (${data.confidence}%) ${sweepHtml}
-        </div>
-        <div class="levels">
-            <span>Entry:</span> ${formatPrice(data.entry_price)}<br>
-            <span>Stop loss:</span> ${formatPrice(data.stop_loss)}<br>
-            <span>TP1 (1:2):</span> ${formatPrice(data.take_profit_1)}<br>
-            <span>TP2 (1:3):</span> ${formatPrice(data.take_profit_2)}<br>
-            <span>TP3 (1:5):</span> ${formatPrice(data.take_profit_3)}
-        </div>
-        <div class="meta">
-            <span>${data.structure || '—'}</span>
-            <span>⚡ ${data.confidence || 0}%</span>
-        </div>
-    `;
-}
-
-function updateAlignment(data) {
-    const box = document.getElementById("alignmentBox");
-    if (!box) return;
-
-    const scalpDir = data.scalp?.direction;
-    const instDir = data.institutional?.direction;
-    const hybridDir = data.hybrid?.direction;
-
-    // FULL ALIGNMENT : all three same and not NO_TRADE
-    if (scalpDir && instDir && hybridDir &&
-        scalpDir === instDir && instDir === hybridDir &&
-        scalpDir !== "NO_TRADE" && scalpDir !== "NEUTRAL") {
-        box.style.background = "#064e3b";
-        box.style.color = "#4ade80";
-        box.style.borderColor = "#4ade80";
-        box.innerHTML = `✅ FULL ALIGNMENT · ${scalpDir}`;
-        return;
-    }
-
-    // HYBRID gives direction (usually strongest)
-    if (hybridDir && hybridDir !== "NO_TRADE" && hybridDir !== "NEUTRAL") {
-        box.style.background = "#1e293b";
-        box.style.color = "#facc15";
-        box.style.borderColor = "#facc15";
-        box.innerHTML = `⚠️ PARTIAL · Hybrid: ${hybridDir}`;
-        return;
-    }
-
-    // default
-    box.style.background = "#1e293b";
-    box.style.color = "#94a3b8";
-    box.style.borderColor = "#334155";
-    box.innerHTML = `⚪ NO ALIGNMENT · analyzing`;
-}
-
-function loadChart(symbol, tf) {
-    if (tvWidget) {
-        try { tvWidget.remove(); } catch { }
-        document.getElementById("main_chart").innerHTML = "";
-    }
-
-    // convert django timeframe to TradingView interval
-    const intervalMap = {
-        '1m': '1', '5m': '5', '15m': '15', '30m': '30',
-        '1h': '60', '4h': '240', '1d': 'D'
+(function() {
+    // CONFIG
+    const API_URL = "http://127.0.0.1:8000/api/signal/";
+    const EMAIL_API_URL = "send_signal.php"; // PHP script for sending email
+    const TV_SYMBOL = {
+        XAUUSD: "OANDA:XAUUSD",
+        EURUSD: "FX:EURUSD",
+        XAGUSD: "OANDA:XAGUSD",
+        BTCUSD: "COINBASE:BTCUSD"
     };
 
-    tvWidget = new TradingView.widget({
-        width: "100%",
-        height: "100%",
-        symbol: TV_SYMBOL[symbol],
-        interval: intervalMap[tf] || '15',
-        timezone: "Asia/Dhaka",
-        theme: "dark",
-        style: "1",
-        container_id: "main_chart",
-        locale: "en",
-        toolbar_bg: "#0f172a",
-        enable_publishing: false,
-        hide_side_toolbar: false,
-        studies: ["MACD@tv-basicstudies", "RSI@tv-basicstudies"]
-    });
+    let tvWidget = null;
+    let timeLeft = 5;
+    let currentSymbol = "XAUUSD";
+    let currentTF = "15m";
+    let latestSignalData = null;
 
-    document.getElementById("chartTitle").innerHTML = `
-        <span>📈 ${symbol} · ${tf} · Smart Money Concepts</span>
-        <span id="apiStatus" style="font-size:0.7rem; background:#1e2a3a; padding:4px 12px; border-radius:40px;">⚡ live</span>
-    `;
-}
+    // DOM elements
+    const symbolSelect = document.getElementById('symbol');
+    const tfSelect = document.getElementById('tf');
+    const alignmentBox = document.getElementById('alignmentBox');
+    const livePriceSpan = document.getElementById('livePrice');
+    const timerSpan = document.getElementById('timer');
+    const apiStatusSpan = document.getElementById('apiStatus');
+    const chartTitleSymbol = document.getElementById('chartTitleSymbol');
+    const sendSignalBtn = document.getElementById('sendSignalBtn');
+    const emailInput = document.getElementById('emailInput');
+    const emailStatus = document.getElementById('emailStatus');
+    const toastMessage = document.getElementById('toastMessage');
+    const toastText = document.getElementById('toastText');
 
-// ==================== MAIN FETCH ====================
-async function fetchSignals() {
-    const symbol = document.getElementById("symbol").value;
-    const tf = document.getElementById("tf").value;
+    // Helper format
+    const formatPrice = (p) => (p && !isNaN(p)) ? Number(p).toFixed(2) : '—';
 
-    try {
-        const url = `${API_URL}?symbol=${symbol}&tf=${tf}`;
-        console.log("Fetching:", url);
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
+    // Show toast notification
+    function showToast(message, isSuccess = true) {
+        toastText.innerText = message;
+        toastMessage.style.borderColor = isSuccess ? '#3eff9e' : '#ff6b6b';
+        toastMessage.classList.add('show');
+        setTimeout(() => {
+            toastMessage.classList.remove('show');
+        }, 3000);
+    }
 
-        // display live price if available
-        if (data.hybrid?.entry_price) {
-            document.getElementById("livePrice").innerText = formatPrice(data.hybrid.entry_price);
+    // Render signal inside a card
+    function renderSignalCard(containerId, data) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        if (!data || data.signal === "NO_TRADE" || data.signal === "NEUTRAL" || data.signal?.includes("NO_TRADE")) {
+            el.innerHTML = `
+                <div class="signal" style="color:#92acdd;">⏸️ NO TRADE</div>
+                <div class="levels">structure: ${data?.structure || 'neutral'}<br>confidence: ${data?.confidence || 0}%</div>
+                <div class="meta"><span>⏺ waiting</span><span>⚡ 0%</span></div>
+            `;
+            return;
         }
 
-        // render cards
-        renderSignalCard(data.scalp, "scalp");
-        renderSignalCard(data.institutional, "institutional");
-        renderSignalCard(data.hybrid, "hybrid");
+        const isLong = data.direction === "LONG";
+        const color = isLong ? "#86efac" : "#fca5a5";
+        const arrow = isLong ? "▲" : "▼";
+        const badge = data.liquidity_swept ? `<span class="sweep-badge"><i class="fas fa-water"></i> sweep</span>` : '';
 
-        // alignment box
-        updateAlignment(data);
-
-        document.getElementById("apiStatus").innerText = "✓ live";
-    } catch (err) {
-        console.error("API error", err);
-        document.getElementById("apiStatus").innerText = "⚠️ offline";
-
-        // fallback – keep previous data
+        el.innerHTML = `
+            <div class="signal" style="color:${color}">
+                ${arrow} ${data.signal} (${data.confidence}%) ${badge}
+            </div>
+            <div class="levels">
+                <span>Entry:</span> ${formatPrice(data.entry_price)}<br>
+                <span>Stop:</span> ${formatPrice(data.stop_loss)}<br>
+                <span>TP1 (1:2):</span> ${formatPrice(data.take_profit_1)}<br>
+                <span>TP2 (1:3):</span> ${formatPrice(data.take_profit_2)}<br>
+                <span>TP3 (1:5):</span> ${formatPrice(data.take_profit_3)}
+            </div>
+            <div class="meta">
+                <span>${data.structure || '—'}</span>
+                <span><i class="fas fa-bolt"></i> ${data.confidence || 0}%</span>
+            </div>
+        `;
     }
-}
 
-// ==================== DASHBOARD UPDATE ====================
-function updateDashboard() {
-    const symbol = document.getElementById("symbol").value;
-    const tf = document.getElementById("tf").value;
+    // ALIGNMENT style with modern messaging
+    function updateAlignmentBox(data) {
+        if (!alignmentBox) return;
+        const scalpDir = data.scalp?.direction;
+        const instDir = data.institutional?.direction;
+        const hybridDir = data.hybrid?.direction;
 
-    loadChart(symbol, tf);
-    fetchSignals();
+        if (scalpDir && instDir && hybridDir && scalpDir === instDir && instDir === hybridDir && 
+            !["NO_TRADE", "NEUTRAL"].includes(scalpDir)) {
+            alignmentBox.style.background = "rgba(6, 58, 38, 0.8)";
+            alignmentBox.style.color = "#b0ffcf";
+            alignmentBox.style.borderColor = "#26e6a5";
+            alignmentBox.innerHTML = `<i class="fas fa-check-circle" style="color:#60ffb0;"></i> FULL ALIGNMENT · ${scalpDir}`;
+        } else if (hybridDir && !["NO_TRADE", "NEUTRAL"].includes(hybridDir)) {
+            alignmentBox.style.background = "rgba(65, 50, 20, 0.8)";
+            alignmentBox.style.color = "#fcd34d";
+            alignmentBox.style.borderColor = "#fbbf24";
+            alignmentBox.innerHTML = `<i class="fas fa-exclamation-triangle"></i> PARTIAL · hybrid: ${hybridDir}`;
+        } else {
+            alignmentBox.style.background = "rgba(25, 35, 55, 0.9)";
+            alignmentBox.style.color = "#9fb3db";
+            alignmentBox.style.borderColor = "#415e97";
+            alignmentBox.innerHTML = `<i class="fas fa-minus-circle"></i> NO ALIGNMENT · analyzing`;
+        }
+    }
 
-    timeLeft = 5;
-    document.getElementById("timer").innerText = timeLeft + "s";
-}
+    // Load TradingView chart
+    function loadChart(symbol, tf) {
+        if (tvWidget) {
+            try { tvWidget.remove(); } catch(e) { console.warn(e); }
+            document.getElementById("main_chart").innerHTML = "";
+        }
+        const intervalMap = { '1m':'1','5m':'5','15m':'15','30m':'30','1h':'60','4h':'240','1d':'D' };
+        tvWidget = new TradingView.widget({
+            width: "100%",
+            height: "100%",
+            symbol: TV_SYMBOL[symbol],
+            interval: intervalMap[tf] || '15',
+            timezone: "Asia/Dhaka",
+            theme: "dark",
+            style: "1",
+            container_id: "main_chart",
+            locale: "en",
+            toolbar_bg: "#0a0f1c",
+            hide_side_toolbar: false,
+            studies: ["MACD@tv-basicstudies", "RSI@tv-basicstudies"]
+        });
+        chartTitleSymbol.innerText = `${symbol} · ${tf}`;
+    }
 
-// ==================== TIMER ====================
-setInterval(() => {
-    timeLeft--;
-    if (timeLeft <= 0) {
-        fetchSignals();      // only refresh data, keep chart
+    // FETCH signals
+    async function fetchSignals(symbol, tf, skipChartReload = true) {
+        try {
+            const url = `${API_URL}?symbol=${symbol}&tf=${tf}`;
+            console.log("API call", url);
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`status ${response.status}`);
+            const data = await response.json();
+            
+            // Store latest signal data for email
+            latestSignalData = data;
+
+            // update live price if exists
+            if (data.hybrid?.entry_price) {
+                livePriceSpan.innerText = formatPrice(data.hybrid.entry_price);
+            }
+
+            renderSignalCard("scalp", data.scalp);
+            renderSignalCard("institutional", data.institutional);
+            renderSignalCard("hybrid", data.hybrid);
+            updateAlignmentBox(data);
+
+            apiStatusSpan.innerHTML = `<span class="badge-live"></span> live · ${new Date().toLocaleTimeString([], {minute:'2-digit', second:'2-digit'})}`;
+        } catch (err) {
+            console.warn("API error, using fallback visuals", err);
+            apiStatusSpan.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#fbbf24;"></i> offline · retry`;
+        }
+    }
+
+    // SEND EMAIL with signal
+    async function sendSignalEmail() {
+        const email = emailInput.value.trim();
+        if (!email || !email.includes('@')) {
+            showToast('Please enter a valid email address', false);
+            return;
+        }
+
+        if (!latestSignalData) {
+            showToast('No signal data available yet', false);
+            return;
+        }
+
+        // Update status
+        emailStatus.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending...`;
+        
+        try {
+            // Prepare signal data for email
+            const signalInfo = {
+                email: email,
+                symbol: symbolSelect.value,
+                timeframe: tfSelect.value,
+                timestamp: new Date().toISOString(),
+                scalp: latestSignalData.scalp,
+                institutional: latestSignalData.institutional,
+                hybrid: latestSignalData.hybrid,
+                alignment: document.getElementById('alignmentBox').innerText
+            };
+
+            // Send to PHP backend
+            const response = await fetch(EMAIL_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(signalInfo)
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Signal sent to your email!', true);
+                emailStatus.innerHTML = `<i class="fas fa-check-circle" style="color:#3eff9e;"></i> Sent at ${new Date().toLocaleTimeString()}`;
+            } else {
+                throw new Error(result.message || 'Failed to send email');
+            }
+        } catch (err) {
+            console.error('Email error:', err);
+            showToast('Failed to send email. Check console.', false);
+            emailStatus.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ff6b6b;"></i> Failed to send`;
+        }
+    }
+
+    // Periodic update (only signals, not chart)
+    function refreshData() {
+        const sym = symbolSelect.value;
+        const tf = tfSelect.value;
+        fetchSignals(sym, tf, true);
+    }
+
+    // Full update (chart + data)
+    function fullDashboardUpdate() {
+        const sym = symbolSelect.value;
+        const tf = tfSelect.value;
+        currentSymbol = sym;
+        currentTF = tf;
+        loadChart(sym, tf);
+        fetchSignals(sym, tf);
         timeLeft = 5;
+        timerSpan.innerHTML = `<i class="fas fa-circle" style="color:#33ff99; font-size: 0.5rem;"></i> 5s`;
     }
-    document.getElementById("timer").innerText = timeLeft + "s";
-}, 1000);
 
-// ==================== EVENT LISTENERS ====================
-document.getElementById("symbol").addEventListener("change", updateDashboard);
-document.getElementById("tf").addEventListener("change", updateDashboard);
+    // Timer countdown
+    setInterval(() => {
+        timeLeft -= 1;
+        if (timeLeft <= 0) {
+            refreshData();          // only fetch new signals, keep chart
+            timeLeft = 5;
+        }
+        timerSpan.innerHTML = `<i class="fas fa-circle" style="color:#33ff99; font-size: 0.5rem;"></i> ${timeLeft}s`;
+    }, 1000);
 
-// ==================== START ====================
-updateDashboard();
+    // Event listeners
+    symbolSelect.addEventListener('change', fullDashboardUpdate);
+    tfSelect.addEventListener('change', fullDashboardUpdate);
+    sendSignalBtn.addEventListener('click', sendSignalEmail);
 
+    // start
+    fullDashboardUpdate();
+
+    // minor: update chart title on manual change if needed (but fullDashboardUpdate does)
+})();
 </script>
 
+<!-- extra safe style for dynamic badges -->
+<style>
+    .glass-card .levels span { color: #c3dcff; font-weight: 500; }
+    #alignmentBox i { margin-right: 8px; }
+    .timer-badge i { margin-right: 4px; }
+    .badge-live { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } }
+    .sweep-badge i { margin-right: 4px; }
+</style>
 </body>
 </html>
